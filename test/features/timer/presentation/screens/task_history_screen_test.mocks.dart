@@ -75,6 +75,15 @@ class MockTaskHistoryCubit extends _i1.Mock implements _i3.TaskHistoryCubit {
           as _i4.Future<void>);
 
   @override
+  _i4.Future<void> loadDetailedHistory() =>
+      (super.noSuchMethod(
+            Invocation.method(#loadDetailedHistory, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
   void emit(_i2.TaskHistoryState? state) => super.noSuchMethod(
     Invocation.method(#emit, [state]),
     returnValueForMissingStub: null,

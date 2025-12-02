@@ -1,6 +1,7 @@
 import 'package:time_tracking_kanaban/core/utils/result.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart';
+import 'package:time_tracking_kanaban/features/timer/domain/entities/task_history_detail.dart';
 
 /// Abstraction over timer/time tracking operations.
 ///
@@ -43,4 +44,8 @@ abstract class TimerRepository {
   /// Returns summaries for all completed tasks, intended for the
   /// "Task History" view.
   Future<Result<List<TaskTimerSummary>>> getCompletedTasksHistory();
+
+  /// Returns detailed history for all completed tasks, including time logs.
+  /// Intended for the "Task History" view with expanded details.
+  Future<Result<List<TaskHistoryDetail>>> getCompletedTasksHistoryDetailed();
 }

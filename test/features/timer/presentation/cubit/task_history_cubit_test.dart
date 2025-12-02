@@ -6,21 +6,30 @@ import 'package:time_tracking_kanaban/core/errors/failure.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/usecases/get_completed_tasks_history_usecase.dart';
+import 'package:time_tracking_kanaban/features/timer/domain/usecases/get_completed_tasks_history_detailed_usecase.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/cubit/task_history_cubit.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/cubit/task_history_state.dart';
 
 import '../../../../mocks/mock_setup.dart';
 import 'task_history_cubit_test.mocks.dart';
 
-@GenerateMocks([GetCompletedTasksHistoryUseCase])
+@GenerateMocks([
+  GetCompletedTasksHistoryUseCase,
+  GetCompletedTasksHistoryDetailedUseCase,
+])
 void main() {
   late TaskHistoryCubit taskHistoryCubit;
   late MockGetCompletedTasksHistoryUseCase mockGetCompletedTasksHistoryUseCase;
+  late MockGetCompletedTasksHistoryDetailedUseCase mockGetCompletedTasksHistoryDetailedUseCase;
 
   setUp(() {
     setupMockDummyValues();
     mockGetCompletedTasksHistoryUseCase = MockGetCompletedTasksHistoryUseCase();
-    taskHistoryCubit = TaskHistoryCubit(mockGetCompletedTasksHistoryUseCase);
+    mockGetCompletedTasksHistoryDetailedUseCase = MockGetCompletedTasksHistoryDetailedUseCase();
+    taskHistoryCubit = TaskHistoryCubit(
+      mockGetCompletedTasksHistoryUseCase,
+      mockGetCompletedTasksHistoryDetailedUseCase,
+    );
   });
 
   tearDown(() {

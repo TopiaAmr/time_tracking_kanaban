@@ -58,9 +58,15 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
         },
         filtersOpen: _filtersOpen,
         onToggleFilters: () {
-          setState(() {
-            _filtersOpen = !_filtersOpen;
-          });
+          if (isMobile) {
+            // Show modal bottom sheet on mobile
+            _showFilterBottomSheet(context);
+          } else {
+            // Toggle sidebar on desktop/tablet
+            setState(() {
+              _filtersOpen = !_filtersOpen;
+            });
+          }
         },
       ),
       rightSidebar: _filtersOpen
@@ -146,6 +152,86 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
             return const KanbanSkeleton();
           }
         },
+      ),
+    );
+  }
+
+  /// Show filter sidebar as modal bottom sheet on mobile.
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Filter content
+              Expanded(
+                child: FilterSidebar(
+                  selectedDateRange: _selectedDateRange,
+                  onDateRangeChanged: (value) {
+                    setState(() {
+                      _selectedDateRange = value;
+                    });
+                  },
+                  assignedUsers: const [
+                    'David Wilson',
+                    'James Davis',
+                    'William Anderson',
+                    'Daniel Taylor',
+                    'Robert Johnson',
+                  ],
+                  selectedAssignedUsers: _selectedAssignedUsers,
+                  onAssignedUsersChanged: (users) {
+                    setState(() {
+                      _selectedAssignedUsers = users;
+                    });
+                  },
+                  selectedCompany: _selectedCompany,
+                  onCompanyChanged: (company) {
+                    setState(() {
+                      _selectedCompany = company;
+                    });
+                  },
+                  selectedTaskType: _selectedTaskType,
+                  onTaskTypeChanged: (type) {
+                    setState(() {
+                      _selectedTaskType = type;
+                    });
+                  },
+                  onClearFilters: () {
+                    setState(() {
+                      _selectedDateRange = null;
+                      _selectedAssignedUsers = [];
+                      _selectedCompany = null;
+                      _selectedTaskType = null;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 import 'package:time_tracking_kanaban/features/timer/data/datasources/timer_local_datasource.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart';
+import 'package:time_tracking_kanaban/features/timer/domain/entities/task_history_detail.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/repository/timer_repository.dart';
 
 /// Implementation of [TimerRepository] using local storage.
@@ -217,41 +218,106 @@ class TimerRepositoryImpl implements TimerRepository {
 
       final allLogs = (allLogsResult as Success<List<TimeLog>>).value;
 
-      // Group logs by taskId
+      // Group all logs by taskId
       final Map<String, List<TimeLog>> logsByTask = {};
       for (final log in allLogs) {
-        if (!log.isActive) {
-          // Only include completed logs
-          logsByTask.putIfAbsent(log.taskId, () => []).add(log);
-        }
+        logsByTask.putIfAbsent(log.taskId, () => []).add(log);
       }
 
       // Calculate summaries for each task
       final summaries = <TaskTimerSummary>[];
       for (final entry in logsByTask.entries) {
         int totalSeconds = 0;
+        bool hasActiveTimer = false;
+        
+        // Calculate total time and check for active timer
         for (final log in entry.value) {
-          if (log.endTime != null) {
+          if (log.isActive) {
+            hasActiveTimer = true;
+            // Don't include active timer duration in completed history
+          } else if (log.endTime != null) {
             totalSeconds += log.durationSeconds(log.endTime!);
           }
         }
 
-        // Get task title from local cache
-        String taskTitle = 'Task ${entry.key}';
-        final taskResult = await tasksLocalDataSource.getCachedTask(entry.key);
-        if (taskResult is Success<Task>) {
-          taskTitle = taskResult.value.content;
-        }
+        // Only include tasks that have completed time logs
+        if (totalSeconds > 0) {
+          // Get task title from local cache
+          String taskTitle = 'Task ${entry.key}';
+          final taskResult = await tasksLocalDataSource.getCachedTask(entry.key);
+          if (taskResult is Success<Task>) {
+            taskTitle = taskResult.value.content;
+          }
 
-        summaries.add(TaskTimerSummary(
-          taskId: entry.key,
-          taskTitle: taskTitle,
-          totalTrackedSeconds: totalSeconds,
-          hasActiveTimer: false,
-        ));
+          summaries.add(TaskTimerSummary(
+            taskId: entry.key,
+            taskTitle: taskTitle,
+            totalTrackedSeconds: totalSeconds,
+            hasActiveTimer: hasActiveTimer,
+          ));
+        }
       }
 
       return Success(summaries);
+    } catch (e) {
+      return Error(CacheFailure([e.toString()]));
+    }
+  }
+
+  @override
+  Future<Result<List<TaskHistoryDetail>>> getCompletedTasksHistoryDetailed() async {
+    try {
+      final allLogsResult = await localDataSource.getAllTimeLogs();
+      if (allLogsResult is Error<List<TimeLog>>) {
+        return Error<List<TaskHistoryDetail>>(allLogsResult.failure);
+      }
+
+      final allLogs = (allLogsResult as Success<List<TimeLog>>).value;
+
+      // Group all logs by taskId
+      final Map<String, List<TimeLog>> logsByTask = {};
+      for (final log in allLogs) {
+        logsByTask.putIfAbsent(log.taskId, () => []).add(log);
+      }
+
+      // Calculate detailed history for each task
+      final details = <TaskHistoryDetail>[];
+      for (final entry in logsByTask.entries) {
+        int totalSeconds = 0;
+        bool hasActiveTimer = false;
+        final completedLogs = <TimeLog>[];
+        
+        // Calculate total time and collect logs
+        for (final log in entry.value) {
+          if (log.isActive) {
+            hasActiveTimer = true;
+            // Don't include active timer duration in completed history
+          } else if (log.endTime != null) {
+            totalSeconds += log.durationSeconds(log.endTime!);
+            completedLogs.add(log);
+          }
+        }
+
+        // Only include tasks that have completed time logs
+        if (totalSeconds > 0) {
+          // Get task title from local cache
+          String taskTitle = 'Task ${entry.key}';
+          final taskResult = await tasksLocalDataSource.getCachedTask(entry.key);
+          if (taskResult is Success<Task>) {
+            taskTitle = taskResult.value.content;
+          }
+
+          details.add(TaskHistoryDetail(
+            taskId: entry.key,
+            taskTitle: taskTitle,
+            totalTrackedSeconds: totalSeconds,
+            hasActiveTimer: hasActiveTimer,
+            timeLogs: completedLogs,
+          ));
+        }
+      }
+
+      return Success(details);
     } catch (e) {
       return Error(CacheFailure([e.toString()]));
     }

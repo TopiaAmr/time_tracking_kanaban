@@ -52,6 +52,8 @@ import 'features/timer/data/datasources/timer_local_datasource.dart' as _i93;
 import 'features/timer/data/repositories/timer_repository_impl.dart' as _i310;
 import 'features/timer/domain/repository/timer_repository.dart' as _i79;
 import 'features/timer/domain/usecases/get_active_timer_usecase.dart' as _i540;
+import 'features/timer/domain/usecases/get_completed_tasks_history_detailed_usecase.dart'
+    as _i1066;
 import 'features/timer/domain/usecases/get_completed_tasks_history_usecase.dart'
     as _i1062;
 import 'features/timer/domain/usecases/get_task_time_logs_usecase.dart'
@@ -109,6 +111,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i540.GetActiveTimerUseCase>(
       () => _i540.GetActiveTimerUseCase(gh<_i79.TimerRepository>()),
+    );
+    gh.lazySingleton<_i1066.GetCompletedTasksHistoryDetailedUseCase>(
+      () => _i1066.GetCompletedTasksHistoryDetailedUseCase(
+        gh<_i79.TimerRepository>(),
+      ),
     );
     gh.lazySingleton<_i1062.GetCompletedTasksHistoryUseCase>(
       () => _i1062.GetCompletedTasksHistoryUseCase(gh<_i79.TimerRepository>()),
@@ -172,8 +179,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i878.UpdateTaskUseCase(gh<_i81.TasksRepository>()),
     );
     gh.lazySingleton<_i331.TaskHistoryCubit>(
-      () =>
-          _i331.TaskHistoryCubit(gh<_i1062.GetCompletedTasksHistoryUseCase>()),
+      () => _i331.TaskHistoryCubit(
+        gh<_i1062.GetCompletedTasksHistoryUseCase>(),
+        gh<_i1066.GetCompletedTasksHistoryDetailedUseCase>(),
+      ),
     );
     gh.factory<_i861.CommentsRepository>(
       () => _i896.CommentsRepositoryImpl(

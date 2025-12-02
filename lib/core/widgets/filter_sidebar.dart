@@ -55,7 +55,7 @@ class FilterSidebar extends StatelessWidget {
     final theme = Theme.of(context);
     final isMobile = context.isMobile;
 
-    Widget content = Container(
+    return Container(
       constraints: BoxConstraints(
         minWidth: isMobile ? 0 : 280,
         maxWidth: isMobile ? double.infinity : 600,
@@ -270,22 +270,6 @@ class FilterSidebar extends StatelessWidget {
         ],
       ),
     );
-
-    if (isMobile) {
-      return DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) {
-          return SingleChildScrollView(
-            controller: scrollController,
-            child: content,
-          );
-        },
-      );
-    }
-
-    return content;
   }
 }
 

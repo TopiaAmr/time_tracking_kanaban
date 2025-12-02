@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:time_tracking_kanaban/core/l10n/l10n.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
+import 'package:time_tracking_kanaban/core/widgets/app_header.dart';
 import 'package:time_tracking_kanaban/core/widgets/app_scaffold.dart';
 import 'package:time_tracking_kanaban/core/widgets/task_detail_skeleton.dart';
 import 'package:time_tracking_kanaban/di.dart';
@@ -18,6 +19,7 @@ import 'package:time_tracking_kanaban/features/tasks/presentation/bloc/kanban_ev
 import 'package:time_tracking_kanaban/features/tasks/presentation/cubit/comments_cubit.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/usecases/get_task_time_logs_usecase.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/cubit/task_history_cubit.dart';
 import 'package:time_tracking_kanaban/features/tasks/presentation/widgets/task_detail/task_assignees_section.dart';
 import 'package:time_tracking_kanaban/features/tasks/presentation/widgets/task_detail/task_comments_section.dart';
 import 'package:time_tracking_kanaban/features/tasks/presentation/widgets/task_detail/task_dates_section.dart';
@@ -162,6 +164,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       ],
       child: AppScaffold(
         currentPath: '/tasks',
+        header: AppHeader(
+          title: _task?.content ?? 'Task Details',
+          showBackButton: true,
+        ),
         body: _isLoading
             ? const TaskDetailSkeleton()
             : _error != null
@@ -318,6 +324,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void _showEditDialog(BuildContext context) {
     if (_task == null) return;
 
+    final formKey = GlobalKey<FormState>();
     final titleController = TextEditingController(text: _task!.content);
     final descriptionController = TextEditingController(
       text: _task!.description,
@@ -330,164 +337,272 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(context.l10n.taskEdit),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.taskTitle,
-                    border: const OutlineInputBorder(),
-                  ),
-                  autofocus: true,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.taskDescription,
-                    border: const OutlineInputBorder(),
-                  ),
-                  maxLines: 4,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: priorityController,
-                        decoration: InputDecoration(
-                          labelText: context.l10n.taskPriority,
-                          border: const OutlineInputBorder(),
-                          helperText: '1-4 (4 is highest)',
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: selectedDueDate ?? DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(
-                              const Duration(days: 365),
+        builder: (context, setState) {
+          final theme = Theme.of(context);
+          
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 600),
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            context.l10n.taskEdit,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                          );
-                          if (picked != null) {
-                            setState(() => selectedDueDate = picked);
-                          }
-                        },
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: context.l10n.taskDueDate,
-                            border: const OutlineInputBorder(),
-                            suffixIcon: const Icon(Icons.calendar_today),
                           ),
-                          child: Text(
-                            selectedDueDate != null
-                                ? DateFormat(
-                                    'MMM d, yyyy',
-                                  ).format(selectedDueDate!)
-                                : context.l10n.taskNoDueDate,
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.of(context).pop(),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+
+                      // Task title
+                      TextFormField(
+                        controller: titleController,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.taskTitle,
+                          hintText: 'Enter task title',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.title),
+                        ),
+                        textCapitalization: TextCapitalization.sentences,
+                        maxLength: 500,
+                        autofocus: true,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Title is required';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Task description
+                      TextFormField(
+                        controller: descriptionController,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.taskDescription,
+                          hintText: 'Enter task description (optional)',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.description),
+                          alignLabelWithHint: true,
+                        ),
+                        maxLines: 4,
+                        textCapitalization: TextCapitalization.sentences,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Priority and Due Date Row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Priority
+                          Expanded(
+                            child: TextFormField(
+                              controller: priorityController,
+                              decoration: InputDecoration(
+                                labelText: context.l10n.taskPriority,
+                                hintText: '1-4',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                prefixIcon: const Icon(Icons.flag),
+                                helperText: '1 (Low) - 4 (Urgent)',
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return null;
+                                }
+                                final priority = int.tryParse(value);
+                                if (priority == null || priority < 1 || priority > 4) {
+                                  return 'Must be 1-4';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          // Due Date
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: () async {
+                                    final picked = await showDatePicker(
+                                      context: context,
+                                      initialDate: selectedDueDate ?? DateTime.now(),
+                                      firstDate: DateTime.now(),
+                                      lastDate: DateTime.now().add(
+                                        const Duration(days: 365),
+                                      ),
+                                    );
+                                    if (picked != null) {
+                                      setState(() => selectedDueDate = picked);
+                                    }
+                                  },
+                                  icon: const Icon(Icons.calendar_today, size: 18),
+                                  label: Text(
+                                    selectedDueDate != null
+                                        ? DateFormat('MMM d, yyyy').format(selectedDueDate!)
+                                        : context.l10n.taskDueDate,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 16,
+                                    ),
+                                  ),
+                                ),
+                                if (selectedDueDate != null) ...[
+                                  const SizedBox(height: 4),
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      setState(() => selectedDueDate = null);
+                                    },
+                                    icon: const Icon(Icons.clear, size: 16),
+                                    label: const Text('Clear date'),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Action buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(context.l10n.taskCancel),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              if (!formKey.currentState!.validate()) {
+                                return;
+                              }
+
+                              if (!mounted) return;
+                              final navigator = Navigator.of(context);
+                              final scaffoldMessenger = ScaffoldMessenger.of(context);
+                              final theme = Theme.of(context);
+                              final l10n = context.l10n;
+
+                              final newPriority =
+                                  int.tryParse(priorityController.text) ?? _task!.priority;
+                              final updatedTask = Task(
+                                userId: _task!.userId,
+                                id: _task!.id,
+                                projectId: _task!.projectId,
+                                sectionId: _task!.sectionId,
+                                parentId: _task!.parentId,
+                                addedByUid: _task!.addedByUid,
+                                assignedByUid: _task!.assignedByUid,
+                                responsibleUid: _task!.responsibleUid,
+                                labels: _task!.labels,
+                                deadline: _task!.deadline,
+                                duration: _task!.duration,
+                                checked: _task!.checked,
+                                isDeleted: _task!.isDeleted,
+                                addedAt: _task!.addedAt,
+                                completedAt: _task!.completedAt,
+                                completedByUid: _task!.completedByUid,
+                                updatedAt: DateTime.now(),
+                                due: selectedDueDate,
+                                priority: newPriority.clamp(1, 4),
+                                childOrder: _task!.childOrder,
+                                content: titleController.text.trim(),
+                                description: descriptionController.text.trim(),
+                                noteCount: _task!.noteCount,
+                                dayOrder: _task!.dayOrder,
+                                isCollapsed: _task!.isCollapsed,
+                              );
+
+                              navigator.pop();
+
+                              final updateTaskUseCase = getIt<UpdateTaskUseCase>();
+                              final result = await updateTaskUseCase(
+                                UpdateTaskParams(updatedTask),
+                              );
+
+                              if (!mounted) return;
+
+                              if (result is Error<Task>) {
+                                scaffoldMessenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.errorUnknown),
+                                    backgroundColor: theme.colorScheme.error,
+                                  ),
+                                );
+                              } else {
+                                // Notify KanbanBloc if available
+                                try {
+                                  final kanbanBloc = getIt<KanbanBloc>();
+                                  kanbanBloc.add(
+                                    UpdateTaskEvent((result as Success<Task>).value),
+                                  );
+                                } catch (e) {
+                                  // KanbanBloc might not be available - that's okay
+                                }
+
+                                // Notify TaskHistoryCubit to refresh history
+                                try {
+                                  final taskHistoryCubit = getIt<TaskHistoryCubit>();
+                                  taskHistoryCubit.loadDetailedHistory();
+                                } catch (e) {
+                                  // TaskHistoryCubit might not be available - that's okay
+                                }
+
+                                // Reload task
+                                await _loadTask();
+                                if (mounted) {
+                                  scaffoldMessenger.showSnackBar(
+                                    SnackBar(content: Text(l10n.taskUpdated)),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.save),
+                            label: Text(context.l10n.taskSave),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.taskCancel),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (!mounted) return;
-                final navigator = Navigator.of(context);
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                final theme = Theme.of(context);
-                final l10n = context.l10n;
-
-                final newPriority =
-                    int.tryParse(priorityController.text) ?? _task!.priority;
-                final updatedTask = Task(
-                  userId: _task!.userId,
-                  id: _task!.id,
-                  projectId: _task!.projectId,
-                  sectionId: _task!.sectionId,
-                  parentId: _task!.parentId,
-                  addedByUid: _task!.addedByUid,
-                  assignedByUid: _task!.assignedByUid,
-                  responsibleUid: _task!.responsibleUid,
-                  labels: _task!.labels,
-                  deadline: _task!.deadline,
-                  duration: _task!.duration,
-                  checked: _task!.checked,
-                  isDeleted: _task!.isDeleted,
-                  addedAt: _task!.addedAt,
-                  completedAt: _task!.completedAt,
-                  completedByUid: _task!.completedByUid,
-                  updatedAt: DateTime.now(),
-                  due: selectedDueDate,
-                  priority: newPriority.clamp(1, 4),
-                  childOrder: _task!.childOrder,
-                  content: titleController.text.trim(),
-                  description: descriptionController.text.trim(),
-                  noteCount: _task!.noteCount,
-                  dayOrder: _task!.dayOrder,
-                  isCollapsed: _task!.isCollapsed,
-                );
-
-                navigator.pop();
-
-                final updateTaskUseCase = getIt<UpdateTaskUseCase>();
-                final result = await updateTaskUseCase(
-                  UpdateTaskParams(updatedTask),
-                );
-
-                if (!mounted) return;
-
-                if (result is Error<Task>) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.errorUnknown),
-                      backgroundColor: theme.colorScheme.error,
-                    ),
-                  );
-                } else {
-                  // Notify KanbanBloc if available (it's registered as factory, so we can get it)
-                  try {
-                    final kanbanBloc = getIt<KanbanBloc>();
-                    kanbanBloc.add(
-                      UpdateTaskEvent((result as Success<Task>).value),
-                    );
-                  } catch (e) {
-                    // KanbanBloc might not be available - that's okay
-                  }
-
-                  // Reload task
-                  await _loadTask();
-                  if (mounted) {
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(content: Text(l10n.taskUpdated)),
-                    );
-                  }
-                }
-              },
-              child: Text(context.l10n.taskSave),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

@@ -153,5 +153,57 @@ void main() {
         expect(result.value.any((s) => s.taskId == 'task2'), isTrue);
       }
     });
+
+    test('should include tasks with active timers in history if they have completed logs', () async {
+      final now = DateTime.now();
+      // Task with completed log
+      final completedLog = TimeLog(
+        id: 'timer1',
+        taskId: 'task1',
+        startTime: now.subtract(const Duration(hours: 2)),
+        endTime: now.subtract(const Duration(hours: 1)),
+      );
+      // Same task with active timer
+      final activeLog = TimeLog(
+        id: 'timer2',
+        taskId: 'task1',
+        startTime: now.subtract(const Duration(minutes: 30)),
+        endTime: null,
+      );
+
+      await localDataSource.insertTimeLog(completedLog);
+      await localDataSource.insertTimeLog(activeLog);
+
+      final result = await repository.getCompletedTasksHistory();
+
+      expect(result, isA<Success<List<TaskTimerSummary>>>());
+      if (result is Success<List<TaskTimerSummary>>) {
+        expect(result.value.length, equals(1));
+        final summary = result.value.first;
+        expect(summary.taskId, equals('task1'));
+        expect(summary.hasActiveTimer, isTrue);
+        expect(summary.totalTrackedSeconds, greaterThan(0));
+      }
+    });
+
+    test('should not include tasks with only active timers and no completed logs', () async {
+      final now = DateTime.now();
+      // Task with only active timer, no completed logs
+      final activeLog = TimeLog(
+        id: 'timer1',
+        taskId: 'task1',
+        startTime: now.subtract(const Duration(minutes: 30)),
+        endTime: null,
+      );
+
+      await localDataSource.insertTimeLog(activeLog);
+
+      final result = await repository.getCompletedTasksHistory();
+
+      expect(result, isA<Success<List<TaskTimerSummary>>>());
+      if (result is Success<List<TaskTimerSummary>>) {
+        expect(result.value.length, equals(0));
+      }
+    });
   });
 }

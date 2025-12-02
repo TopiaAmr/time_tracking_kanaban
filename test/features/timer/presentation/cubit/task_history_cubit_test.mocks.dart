@@ -9,8 +9,12 @@ import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
 import 'package:time_tracking_kanaban/core/usecases/usecase.dart' as _i6;
 import 'package:time_tracking_kanaban/core/utils/result.dart' as _i4;
+import 'package:time_tracking_kanaban/features/timer/domain/entities/task_history_detail.dart'
+    as _i9;
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart'
     as _i5;
+import 'package:time_tracking_kanaban/features/timer/domain/usecases/get_completed_tasks_history_detailed_usecase.dart'
+    as _i8;
 import 'package:time_tracking_kanaban/features/timer/domain/usecases/get_completed_tasks_history_usecase.dart'
     as _i2;
 
@@ -53,4 +57,30 @@ class MockGetCompletedTasksHistoryUseCase extends _i1.Mock
                 ),
           )
           as _i3.Future<_i4.Result<List<_i5.TaskTimerSummary>>>);
+}
+
+/// A class which mocks [GetCompletedTasksHistoryDetailedUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetCompletedTasksHistoryDetailedUseCase extends _i1.Mock
+    implements _i8.GetCompletedTasksHistoryDetailedUseCase {
+  MockGetCompletedTasksHistoryDetailedUseCase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<_i4.Result<List<_i9.TaskHistoryDetail>>> call(
+    _i6.NoParams? params,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue:
+                _i3.Future<_i4.Result<List<_i9.TaskHistoryDetail>>>.value(
+                  _i7.dummyValue<_i4.Result<List<_i9.TaskHistoryDetail>>>(
+                    this,
+                    Invocation.method(#call, [params]),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<List<_i9.TaskHistoryDetail>>>);
 }

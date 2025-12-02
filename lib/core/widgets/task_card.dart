@@ -346,19 +346,48 @@ class _TimerQuickAction extends StatelessWidget {
             constraints: const BoxConstraints(),
             color: theme.colorScheme.primary,
           ),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.stop, size: 18),
+            onPressed: () {
+              HapticService.heavyImpact();
+              context.read<TimerBloc>().add(const StopTimer());
+            },
+            tooltip: context.l10n.timerStop,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            color: theme.colorScheme.error,
+          ),
         ],
       );
     } else if (isPaused) {
-      return IconButton(
-        icon: const Icon(Icons.play_arrow, size: 18),
-        onPressed: () {
-          HapticService.mediumImpact();
-          context.read<TimerBloc>().add(ResumeTimer(taskId));
-        },
-        tooltip: context.l10n.timerResume,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-        color: theme.colorScheme.primary,
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.play_arrow, size: 18),
+            onPressed: () {
+              HapticService.mediumImpact();
+              context.read<TimerBloc>().add(ResumeTimer(taskId));
+            },
+            tooltip: context.l10n.timerResume,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.stop, size: 18),
+            onPressed: () {
+              HapticService.heavyImpact();
+              context.read<TimerBloc>().add(const StopTimer());
+            },
+            tooltip: context.l10n.timerStop,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            color: theme.colorScheme.error,
+          ),
+        ],
       );
     } else {
       return IconButton(

@@ -7,6 +7,7 @@ import 'package:time_tracking_kanaban/core/navigation/app_router.dart';
 import 'package:time_tracking_kanaban/core/theme/app_theme.dart';
 import 'package:time_tracking_kanaban/core/theme/theme_cubit.dart';
 import 'package:time_tracking_kanaban/core/theme/theme_state.dart';
+import 'package:time_tracking_kanaban/core/widgets/floating_timer_widget.dart';
 import 'package:time_tracking_kanaban/di.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_bloc.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_event.dart';
@@ -79,6 +80,29 @@ class MyApp extends StatelessWidget {
                 
                 // Router configuration
                 routerConfig: router,
+                
+                // Builder to add persistent floating timer on top of all screens
+                builder: (context, child) {
+                  return Overlay(
+                    initialEntries: [
+                      OverlayEntry(
+                        builder: (context) => child ?? const SizedBox.shrink(),
+                      ),
+                      OverlayEntry(
+                        builder: (context) => Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: SafeArea(
+                            child: Center(
+                              child: FloatingTimerWidget(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               );
             },
           );

@@ -25,6 +25,12 @@ class AppHeader extends StatelessWidget {
   /// Callback to toggle filters.
   final VoidCallback? onToggleFilters;
 
+  /// Whether to show back button instead of menu button on mobile.
+  final bool showBackButton;
+
+  /// Callback when back button is pressed. If null, uses Navigator.pop.
+  final VoidCallback? onBackPressed;
+
   const AppHeader({
     super.key,
     required this.title,
@@ -32,6 +38,8 @@ class AppHeader extends StatelessWidget {
     this.onSearchChanged,
     this.filtersOpen = false,
     this.onToggleFilters,
+    this.showBackButton = false,
+    this.onBackPressed,
   });
 
   @override
@@ -51,14 +59,27 @@ class AppHeader extends StatelessWidget {
           // Title row
           Row(
             children: [
-              // Hamburger menu button on mobile
+              // Back button or Hamburger menu button on mobile
               if (isMobile)
-                Builder(
-                  builder: (context) => IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                    tooltip: 'Menu',
-                  ),
+                showBackButton
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
+                        tooltip: 'Back',
+                      )
+                    : Builder(
+                        builder: (context) => IconButton(
+                          icon: const Icon(Icons.menu),
+                          onPressed: () => Scaffold.of(context).openDrawer(),
+                          tooltip: 'Menu',
+                        ),
+                      ),
+              // Back button on desktop when showBackButton is true
+              if (!isMobile && showBackButton)
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
+                  tooltip: 'Back',
                 ),
               Expanded(
                 child: Text(

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:time_tracking_kanaban/core/l10n/l10n.dart';
 import 'package:time_tracking_kanaban/core/widgets/app_header.dart';
 import 'package:time_tracking_kanaban/core/widgets/app_scaffold.dart';
 import 'package:time_tracking_kanaban/core/widgets/task_history_skeleton.dart';
 import 'package:time_tracking_kanaban/di.dart';
-import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
+import 'package:time_tracking_kanaban/features/timer/domain/entities/task_history_detail.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/cubit/task_history_cubit.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/cubit/task_history_state.dart';
 
@@ -32,9 +33,9 @@ class TaskHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = getIt<TaskHistoryCubit>();
     
-    // Load history only if not already loaded
-    if (cubit.state is! TaskHistoryLoaded) {
-      cubit.loadHistory();
+    // Load detailed history only if not already loaded
+    if (cubit.state is! TaskHistoryDetailedLoaded) {
+      cubit.loadDetailedHistory();
     }
     
     return BlocProvider.value(
@@ -68,7 +69,7 @@ class TaskHistoryScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        context.read<TaskHistoryCubit>().loadHistory();
+                        context.read<TaskHistoryCubit>().loadDetailedHistory();
                       },
                       child: const Text('Retry'),
                     ),
@@ -77,8 +78,8 @@ class TaskHistoryScreen extends StatelessWidget {
               );
             }
 
-            if (state is TaskHistoryLoaded) {
-              if (state.summaries.isEmpty) {
+            if (state is TaskHistoryDetailedLoaded) {
+              if (state.details.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -106,7 +107,7 @@ class TaskHistoryScreen extends StatelessWidget {
               }
 
               final theme = Theme.of(context);
-              final totalTrackedSeconds = state.summaries
+              final totalTrackedSeconds = state.details
                   .fold<int>(0, (sum, s) => sum + s.totalTrackedSeconds);
 
               return LayoutBuilder(
@@ -115,7 +116,7 @@ class TaskHistoryScreen extends StatelessWidget {
 
                   final list = ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: state.summaries.length + 1,
+                    itemCount: state.details.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return Card(
@@ -136,7 +137,7 @@ class TaskHistoryScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${state.summaries.length} tasks',
+                                      '${state.details.length} tasks',
                                       style: theme.textTheme.bodySmall?.copyWith(
                                         color: theme.colorScheme.onSurface.withValues(
                                           alpha: 0.6,
@@ -172,14 +173,13 @@ class TaskHistoryScreen extends StatelessWidget {
                         );
                       }
 
-                      final summary = state.summaries[index - 1];
+                      final detail = state.details[index - 1];
                       
-                      return _TaskHistoryItem(
-                        summary: summary,
+                      return _TaskHistoryDetailCard(
+                        detail: detail,
                         isWide: isWide,
                         theme: theme,
                         formatDuration: _formatDuration,
-                        taskTitle: summary.taskTitle,
                       );
                     },
                   );
@@ -205,145 +205,188 @@ class TaskHistoryScreen extends StatelessWidget {
   }
 }
 
-class _TaskHistoryItem extends StatelessWidget {
-  final TaskTimerSummary summary;
+class _TaskHistoryDetailCard extends StatefulWidget {
+  final TaskHistoryDetail detail;
   final bool isWide;
   final ThemeData theme;
   final String Function(int seconds) formatDuration;
-  final String taskTitle;
 
-  const _TaskHistoryItem({
-    required this.summary,
+  const _TaskHistoryDetailCard({
+    required this.detail,
     required this.isWide,
     required this.theme,
     required this.formatDuration,
-    required this.taskTitle,
   });
 
   @override
+  State<_TaskHistoryDetailCard> createState() => _TaskHistoryDetailCardState();
+}
+
+class _TaskHistoryDetailCardState extends State<_TaskHistoryDetailCard> {
+  bool _isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    if (isWide) {
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
+    final detail = widget.detail;
+    final theme = widget.theme;
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        children: [
+          // Task summary header
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: summary.hasActiveTimer
+                      color: detail.hasActiveTimer
                           ? theme.colorScheme.primary.withValues(alpha: 0.1)
                           : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      summary.hasActiveTimer
-                          ? Icons.play_circle_fill
+                      detail.hasActiveTimer
+                          ? Icons.play_circle_filled
                           : Icons.check_circle,
-                      color: summary.hasActiveTimer
+                      color: detail.hasActiveTimer
                           ? theme.colorScheme.primary
                           : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      size: 24,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    flex: 3,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          taskTitle,
+                          detail.taskTitle,
                           style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          formatDuration(summary.totalTrackedSeconds),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.primary,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              widget.formatDuration(detail.totalTrackedSeconds),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '${detail.timeLogs.length} sessions',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  if (summary.hasActiveTimer)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        'ACTIVE',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ],
               ),
             ),
-          );
-        }
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: Icon(
-              summary.hasActiveTimer
-                  ? Icons.play_circle_fill
-                  : Icons.check_circle,
-              color: summary.hasActiveTimer
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-            title: Text(
-              taskTitle,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            subtitle: Text(
-              formatDuration(summary.totalTrackedSeconds),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.primary,
-              ),
-            ),
-            trailing: summary.hasActiveTimer
-                ? Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'ACTIVE',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                  )
-                : Icon(
-                    Icons.access_time,
-                    color: theme.colorScheme.primary,
-                  ),
           ),
-        );
+          // Expanded time logs
+          if (_isExpanded) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Time Log Sessions',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ...detail.timeLogs.map((log) {
+                    final duration = log.durationSeconds(log.endTime ?? DateTime.now());
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      widget.formatDuration(duration),
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        fontFeatures: [const FontFeature.tabularFigures()],
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat('MMM d, yyyy').format(log.startTime),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${DateFormat('HH:mm').format(log.startTime)} - ${log.endTime != null ? DateFormat('HH:mm').format(log.endTime!) : 'Active'}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 

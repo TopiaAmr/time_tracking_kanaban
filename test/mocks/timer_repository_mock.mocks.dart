@@ -8,6 +8,8 @@ import 'dart:async' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i6;
 import 'package:time_tracking_kanaban/core/utils/result.dart' as _i4;
+import 'package:time_tracking_kanaban/features/timer/domain/entities/task_history_detail.dart'
+    as _i8;
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart'
     as _i7;
 import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart'
@@ -147,4 +149,19 @@ class MockTimerRepository extends _i1.Mock implements _i2.TimerRepository {
                 ),
           )
           as _i3.Future<_i4.Result<List<_i7.TaskTimerSummary>>>);
+
+  @override
+  _i3.Future<_i4.Result<List<_i8.TaskHistoryDetail>>>
+  getCompletedTasksHistoryDetailed() =>
+      (super.noSuchMethod(
+            Invocation.method(#getCompletedTasksHistoryDetailed, []),
+            returnValue:
+                _i3.Future<_i4.Result<List<_i8.TaskHistoryDetail>>>.value(
+                  _i6.dummyValue<_i4.Result<List<_i8.TaskHistoryDetail>>>(
+                    this,
+                    Invocation.method(#getCompletedTasksHistoryDetailed, []),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<List<_i8.TaskHistoryDetail>>>);
 }
