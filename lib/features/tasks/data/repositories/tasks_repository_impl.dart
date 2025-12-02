@@ -206,89 +206,72 @@ class TasksRepositoryImpl implements TasksRepository {
   Future<Result<Task>> moveTask(
     Task task,
     String projectId,
-    String sectionId,
+    String? sectionId,
   ) async {
-    final isConnected = await connectivityService.isConnected();
+    // Offline-first: Always update local database first (optimistic update)
+    final updatedTask = Task(
+      userId: task.userId,
+      id: task.id,
+      projectId: projectId,
+      sectionId: sectionId ?? '',
+      parentId: task.parentId,
+      addedByUid: task.addedByUid,
+      assignedByUid: task.assignedByUid,
+      responsibleUid: task.responsibleUid,
+      labels: task.labels,
+      deadline: task.deadline,
+      duration: task.duration,
+      checked: task.checked,
+      isDeleted: task.isDeleted,
+      addedAt: task.addedAt,
+      completedAt: task.completedAt,
+      completedByUid: task.completedByUid,
+      updatedAt: DateTime.now(),
+      due: task.due,
+      priority: task.priority,
+      childOrder: task.childOrder,
+      content: task.content,
+      description: task.description,
+      noteCount: task.noteCount,
+      dayOrder: task.dayOrder,
+      isCollapsed: task.isCollapsed,
+    );
 
+    // Store locally first (optimistic update)
+    final storeResult = await localDataSource.storeTaskEntity(
+      updatedTask,
+      isSynced: false,
+    );
+    if (storeResult is Error<void>) {
+      return Error<Task>(storeResult.failure);
+    }
+
+    // Sync with API in the background (fire and forget)
+    final isConnected = await connectivityService.isConnected();
     if (isConnected) {
-      try {
-        final body = MoveTaskBody(projectId: projectId, sectionId: sectionId);
-        final model = await api.moveTask(task.id, body);
-        final movedTask = model.toEntity();
-        // Cache the moved task
-        await localDataSource.storeTask(model, isSynced: true);
-        return Success(movedTask);
-      } on DioException catch (e) {
-        // If API fails, update locally for later sync
-        final updatedTask = Task(
-          userId: task.userId,
-          id: task.id,
-          projectId: projectId,
-          sectionId: sectionId,
-          parentId: task.parentId,
-          addedByUid: task.addedByUid,
-          assignedByUid: task.assignedByUid,
-          responsibleUid: task.responsibleUid,
-          labels: task.labels,
-          deadline: task.deadline,
-          duration: task.duration,
-          checked: task.checked,
-          isDeleted: task.isDeleted,
-          addedAt: task.addedAt,
-          completedAt: task.completedAt,
-          completedByUid: task.completedByUid,
-          updatedAt: DateTime.now(),
-          due: task.due,
-          priority: task.priority,
-          childOrder: task.childOrder,
-          content: task.content,
-          description: task.description,
-          noteCount: task.noteCount,
-          dayOrder: task.dayOrder,
-          isCollapsed: task.isCollapsed,
-        );
-        await localDataSource.storeTaskEntity(updatedTask, isSynced: false);
-        return Error<Task>(ServerFailure([e.message, e.response?.statusCode]));
-      } catch (e) {
-        return Error<Task>(NetworkFailure([e.toString()]));
-      }
-    } else {
-      // Offline: update locally with isSynced: false
-      final updatedTask = Task(
-        userId: task.userId,
-        id: task.id,
-        projectId: projectId,
-        sectionId: sectionId,
-        parentId: task.parentId,
-        addedByUid: task.addedByUid,
-        assignedByUid: task.assignedByUid,
-        responsibleUid: task.responsibleUid,
-        labels: task.labels,
-        deadline: task.deadline,
-        duration: task.duration,
-        checked: task.checked,
-        isDeleted: task.isDeleted,
-        addedAt: task.addedAt,
-        completedAt: task.completedAt,
-        completedByUid: task.completedByUid,
-        updatedAt: DateTime.now(),
-        due: task.due,
-        priority: task.priority,
-        childOrder: task.childOrder,
-        content: task.content,
-        description: task.description,
-        noteCount: task.noteCount,
-        dayOrder: task.dayOrder,
-        isCollapsed: task.isCollapsed,
-      );
-      final storeResult = await localDataSource.storeTaskEntity(
-        updatedTask,
-        isSynced: false,
-      );
-      if (storeResult is Error<void>) {
-        return Error<Task>(storeResult.failure);
-      }
-      return Success(updatedTask);
+      // Call API in background without blocking
+      _syncMoveTaskInBackground(task, projectId, sectionId);
+    }
+
+    // Return success immediately after local update
+    return Success(updatedTask);
+  }
+
+  /// Syncs the move task operation with the API in the background.
+  Future<void> _syncMoveTaskInBackground(
+    Task originalTask,
+    String projectId,
+    String? sectionId,
+  ) async {
+    try {
+      final body = MoveTaskBody(projectId: projectId, sectionId: sectionId);
+      final model = await api.moveTask(originalTask.id, body);
+      // Update local database with synced status
+      await localDataSource.storeTask(model, isSynced: true);
+    } catch (e) {
+      // If API sync fails, the task remains with isSynced: false
+      // It will be synced later via syncPendingChanges
+      // Silently handle the error - don't throw
     }
   }
 

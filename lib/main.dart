@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:time_tracking_kanaban/core/l10n/l10n_cubit.dart';
+import 'package:time_tracking_kanaban/core/l10n/l10n_state.dart';
+import 'package:time_tracking_kanaban/core/navigation/app_router.dart';
+import 'package:time_tracking_kanaban/core/theme/app_theme.dart';
+import 'package:time_tracking_kanaban/core/theme/theme_cubit.dart';
+import 'package:time_tracking_kanaban/core/theme/theme_state.dart';
 import 'package:time_tracking_kanaban/di.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_bloc.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_event.dart';
+import 'package:time_tracking_kanaban/l10n/app_localizations.dart';
 
 /// Entry point of the application.
 ///
@@ -12,126 +22,67 @@ Future<void> main() async {
   // Load environment variables from .env file
   await dotenv.load(fileName: '.env');
   
-  configureDependencies();
-  runApp(const MyApp());
+  // Configure dependencies (this will register SharedPreferences via PreferencesModule)
+  await configureDependencies();
+  
+  runApp(MyApp());
 }
 
 /// Root widget of the application.
 ///
-/// This widget is the top-level widget that configures the Material app
-/// theme and sets up the initial route.
+/// This widget configures the Material app with theme, localization,
+/// routing, and state management.
 class MyApp extends StatelessWidget {
   /// Creates a [MyApp] instance.
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-/// The home page widget of the application.
-///
-/// This is a stateful widget that displays a counter and allows users
-/// to increment it. This is a placeholder implementation that should
-/// be replaced with the actual application UI.
-class MyHomePage extends StatefulWidget {
-  /// Creates a [MyHomePage] with the given [title].
-  const MyHomePage({super.key, required this.title});
-
-  /// The title to display in the app bar.
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-/// The state for [MyHomePage].
-///
-/// This manages the counter state and provides the UI for the home page.
-class _MyHomePageState extends State<MyHomePage> {
-  /// The current counter value.
-  int _counter = 0;
-
-  /// Increments the counter and triggers a rebuild.
-  ///
-  /// This method updates the counter state, which causes the UI to
-  /// rebuild and display the new value.
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return MultiBlocProvider(
+      providers: [
+        // Theme management - get from DI
+        BlocProvider(
+          create: (context) => getIt<ThemeCubit>(),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        // Locale management - get from DI
+        BlocProvider(
+          create: (context) => getIt<L10nCubit>(),
+        ),
+        // Timer management - global for timer widget and task detail
+        BlocProvider(
+          create: (context) => getIt<TimerBloc>()..add(const LoadActiveTimer()),
+        ),
+      ],
+      child: BlocBuilder<L10nCubit, L10nState>(
+        builder: (context, l10nState) {
+          return BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, themeState) {
+              final router = AppRouter.createRouter();
+              
+              return MaterialApp.router(
+                title: 'Kanva',
+                debugShowCheckedModeBanner: false,
+                
+                // Theme configuration
+                theme: AppTheme.lightTheme(themeState),
+                darkTheme: AppTheme.darkTheme(themeState),
+                themeMode: themeState.themeMode == ThemeModeType.light
+                    ? ThemeMode.light
+                    : themeState.themeMode == ThemeModeType.dark
+                        ? ThemeMode.dark
+                        : ThemeMode.system,
+                
+                // Localization configuration
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                locale: l10nState.locale,
+                
+                // Router configuration
+                routerConfig: router,
+              );
+            },
+          );
+        },
       ),
     );
   }

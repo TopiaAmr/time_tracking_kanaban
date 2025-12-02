@@ -13,14 +13,14 @@ class MoveTaskParams extends Equatable {
   /// The ID of the target project.
   final String projectId;
   
-  /// The ID of the target section.
-  final String sectionId;
+  /// The ID of the target section (null for tasks without section).
+  final String? sectionId;
 
   /// Creates [MoveTaskParams] with the given [task], [projectId], and [sectionId].
   const MoveTaskParams({
     required this.task,
     required this.projectId,
-    required this.sectionId,
+    this.sectionId,
   });
 
   @override
@@ -41,7 +41,11 @@ class MoveTaskUseCase implements UseCase<Task, MoveTaskParams> {
 
   @override
   Future<Result<Task>> call(MoveTaskParams params) async {
-    return await repository.moveTask(params.task, params.projectId, params.sectionId);
+    return await repository.moveTask(
+      params.task,
+      params.projectId,
+      params.sectionId,
+    );
   }
 }
 

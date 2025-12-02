@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:time_tracking_kanaban/core/usecases/usecase.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
@@ -17,7 +17,7 @@ class TaskHistoryCubit extends Cubit<TaskHistoryState> {
 
   /// Creates a [TaskHistoryCubit] with the required use case.
   TaskHistoryCubit(this._getCompletedTasksHistoryUseCase)
-      : super(const TaskHistoryInitial());
+    : super(const TaskHistoryInitial());
 
   /// Loads the history of completed tasks.
   Future<void> loadHistory() async {
@@ -34,4 +34,3 @@ class TaskHistoryCubit extends Cubit<TaskHistoryState> {
     emit(TaskHistoryLoaded(summaries));
   }
 }
-

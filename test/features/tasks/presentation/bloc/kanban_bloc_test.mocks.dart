@@ -9,6 +9,8 @@ import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i8;
 import 'package:time_tracking_kanaban/core/usecases/usecase.dart' as _i7;
 import 'package:time_tracking_kanaban/core/utils/result.dart' as _i5;
+import 'package:time_tracking_kanaban/features/tasks/domain/entities/section.dart'
+    as _i15;
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart'
     as _i6;
 import 'package:time_tracking_kanaban/features/tasks/domain/repository/tasks_repository.dart'
@@ -17,16 +19,16 @@ import 'package:time_tracking_kanaban/features/tasks/domain/usecases/add_task_us
     as _i10;
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/close_task_usecase.dart'
     as _i12;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/delete_task_usecase.dart'
+    as _i13;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_sections_usecase.dart'
+    as _i14;
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart'
     as _i3;
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/move_task_usecase.dart'
     as _i9;
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/update_task_usecase.dart'
     as _i11;
-import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart'
-    as _i14;
-import 'package:time_tracking_kanaban/features/timer/domain/usecases/get_active_timer_usecase.dart'
-    as _i13;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -214,25 +216,68 @@ class MockCloseTaskUseCase extends _i1.Mock implements _i12.CloseTaskUseCase {
           as _i4.Future<_i5.Result<_i6.Task>>);
 }
 
-/// A class which mocks [GetActiveTimerUseCase].
+/// A class which mocks [DeleteTaskUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetActiveTimerUseCase extends _i1.Mock
-    implements _i13.GetActiveTimerUseCase {
-  MockGetActiveTimerUseCase() {
+class MockDeleteTaskUseCase extends _i1.Mock implements _i13.DeleteTaskUseCase {
+  MockDeleteTaskUseCase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i5.Result<_i14.TimeLog?>> call(_i7.NoParams? params) =>
+  _i2.TasksRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeTasksRepository_0(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i2.TasksRepository);
+
+  @override
+  _i4.Future<_i5.Result<void>> call(_i13.DeleteTaskParams? params) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i4.Future<_i5.Result<_i14.TimeLog?>>.value(
-              _i8.dummyValue<_i5.Result<_i14.TimeLog?>>(
+            returnValue: _i4.Future<_i5.Result<void>>.value(
+              _i8.dummyValue<_i5.Result<void>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i4.Future<_i5.Result<_i14.TimeLog?>>);
+          as _i4.Future<_i5.Result<void>>);
+}
+
+/// A class which mocks [GetSections].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetSections extends _i1.Mock implements _i14.GetSections {
+  MockGetSections() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i2.TasksRepository get repository =>
+      (super.noSuchMethod(
+            Invocation.getter(#repository),
+            returnValue: _FakeTasksRepository_0(
+              this,
+              Invocation.getter(#repository),
+            ),
+          )
+          as _i2.TasksRepository);
+
+  @override
+  _i4.Future<_i5.Result<List<_i15.Section>>> call(_i7.NoParams? params) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [params]),
+            returnValue: _i4.Future<_i5.Result<List<_i15.Section>>>.value(
+              _i8.dummyValue<_i5.Result<List<_i15.Section>>>(
+                this,
+                Invocation.method(#call, [params]),
+              ),
+            ),
+          )
+          as _i4.Future<_i5.Result<List<_i15.Section>>>);
 }

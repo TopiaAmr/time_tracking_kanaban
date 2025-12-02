@@ -13,11 +13,15 @@ import 'package:connectivity_plus/connectivity_plus.dart' as _i895;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 import 'core/database/app_database.dart' as _i111;
 import 'core/database/database_module.dart' as _i356;
+import 'core/l10n/l10n_cubit.dart' as _i645;
 import 'core/network/connectivity_service.dart' as _i76;
 import 'core/network/network_module.dart' as _i550;
+import 'core/preferences/preferences_module.dart' as _i305;
+import 'core/theme/theme_cubit.dart' as _i463;
 import 'features/tasks/data/datasources/comments_local_datasource.dart'
     as _i939;
 import 'features/tasks/data/datasources/tasks_local_datasource.dart' as _i884;
@@ -31,6 +35,7 @@ import 'features/tasks/domain/usecases/add_comment_usecase.dart' as _i968;
 import 'features/tasks/domain/usecases/add_task_usecase.dart' as _i923;
 import 'features/tasks/domain/usecases/close_task_usecase.dart' as _i460;
 import 'features/tasks/domain/usecases/delete_comment_usecase.dart' as _i146;
+import 'features/tasks/domain/usecases/delete_task_usecase.dart' as _i821;
 import 'features/tasks/domain/usecases/get_project_usecase.dart' as _i555;
 import 'features/tasks/domain/usecases/get_projects_usecase.dart' as _i91;
 import 'features/tasks/domain/usecases/get_section_usecase.dart' as _i220;
@@ -62,17 +67,28 @@ import 'features/timer/presentation/cubit/task_history_cubit.dart' as _i331;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
-  _i174.GetIt init({
+  Future<_i174.GetIt> init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
-  }) {
+  }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final databaseModule = _$DatabaseModule();
     final networkModule = _$NetworkModule();
+    final preferencesModule = _$PreferencesModule();
     gh.lazySingleton<_i111.AppDatabase>(() => databaseModule.appDatabase);
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
     gh.lazySingleton<_i381.TodoistApi>(() => networkModule.todoistApi);
     gh.lazySingleton<_i895.Connectivity>(() => networkModule.connectivity);
+    await gh.lazySingletonAsync<_i460.SharedPreferences>(
+      () => preferencesModule.sharedPreferences,
+      preResolve: true,
+    );
+    gh.factory<_i645.L10nCubit>(
+      () => _i645.L10nCubit(gh<_i460.SharedPreferences>()),
+    );
+    gh.factory<_i463.ThemeCubit>(
+      () => _i463.ThemeCubit(gh<_i460.SharedPreferences>()),
+    );
     gh.factory<_i939.CommentsLocalDataSource>(
       () => _i939.CommentsLocalDataSource(gh<_i111.AppDatabase>()),
     );
@@ -125,6 +141,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i460.CloseTaskUseCase>(
       () => _i460.CloseTaskUseCase(gh<_i81.TasksRepository>()),
     );
+    gh.lazySingleton<_i821.DeleteTaskUseCase>(
+      () => _i821.DeleteTaskUseCase(gh<_i81.TasksRepository>()),
+    );
     gh.lazySingleton<_i555.GetProject>(
       () => _i555.GetProject(gh<_i81.TasksRepository>()),
     );
@@ -153,6 +172,13 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i331.TaskHistoryCubit(gh<_i1062.GetCompletedTasksHistoryUseCase>()),
     );
+    gh.factory<_i861.CommentsRepository>(
+      () => _i896.CommentsRepositoryImpl(
+        gh<_i381.TodoistApi>(),
+        gh<_i939.CommentsLocalDataSource>(),
+        gh<_i76.ConnectivityService>(),
+      ),
+    );
     gh.factory<_i742.KanbanBloc>(
       () => _i742.KanbanBloc(
         gh<_i951.GetTasksUseCase>(),
@@ -160,14 +186,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i923.AddTaskUseCase>(),
         gh<_i878.UpdateTaskUseCase>(),
         gh<_i460.CloseTaskUseCase>(),
-        gh<_i540.GetActiveTimerUseCase>(),
-      ),
-    );
-    gh.factory<_i861.CommentsRepository>(
-      () => _i896.CommentsRepositoryImpl(
-        gh<_i381.TodoistApi>(),
-        gh<_i939.CommentsLocalDataSource>(),
-        gh<_i76.ConnectivityService>(),
+        gh<_i821.DeleteTaskUseCase>(),
+        gh<_i362.GetSections>(),
       ),
     );
     gh.factory<_i486.TimerBloc>(
@@ -206,3 +226,5 @@ extension GetItInjectableX on _i174.GetIt {
 class _$DatabaseModule extends _i356.DatabaseModule {}
 
 class _$NetworkModule extends _i550.NetworkModule {}
+
+class _$PreferencesModule extends _i305.PreferencesModule {}

@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/comment.dart';
@@ -53,10 +53,9 @@ class CommentsCubit extends Cubit<CommentsState> {
   Future<void> addComment(String taskId, String content) async {
     emit(const CommentsLoading());
 
-    final result = await _addComment(AddCommentParams(
-      taskId: taskId,
-      content: content,
-    ));
+    final result = await _addComment(
+      AddCommentParams(taskId: taskId, content: content),
+    );
 
     if (result is Error<Comment>) {
       emit(CommentsError(result.failure));
@@ -71,10 +70,9 @@ class CommentsCubit extends Cubit<CommentsState> {
   Future<void> updateComment(Comment comment, String newContent) async {
     emit(const CommentsLoading());
 
-    final result = await _updateComment(UpdateCommentParams(
-      commentId: comment.id,
-      content: newContent,
-    ));
+    final result = await _updateComment(
+      UpdateCommentParams(commentId: comment.id, content: newContent),
+    );
 
     if (result is Error<Comment>) {
       emit(CommentsError(result.failure));
@@ -100,4 +98,3 @@ class CommentsCubit extends Cubit<CommentsState> {
     await loadComments(taskId);
   }
 }
-

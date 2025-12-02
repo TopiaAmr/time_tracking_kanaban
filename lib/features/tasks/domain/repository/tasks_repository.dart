@@ -33,8 +33,8 @@ abstract class TasksRepository {
   /// Moves a task to a different project and/or section.
   ///
   /// The [task] is the task to move, [projectId] is the target project,
-  /// and [sectionId] is the target section.
-  Future<Result<Task>> moveTask(Task task, String projectId, String sectionId);
+  /// and [sectionId] is the target section (null for tasks without section).
+  Future<Result<Task>> moveTask(Task task, String projectId, String? sectionId);
 
   /// Deletes a task by its [id].
   ///

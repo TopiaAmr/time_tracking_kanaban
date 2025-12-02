@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -83,16 +82,14 @@ void main() {
           taskId: 'task1',
           startTime: dummyDateTime,
         );
-        when(mockStartTimerUseCase(any)).thenAnswer(
-          (_) async => Success(timeLog),
-        );
+        when(
+          mockStartTimerUseCase(any),
+        ).thenAnswer((_) async => Success(timeLog));
         return timerBloc;
       },
       act: (bloc) => bloc.add(const StartTimer('task1')),
       wait: const Duration(milliseconds: 100),
-      expect: () => [
-        isA<TimerRunning>(),
-      ],
+      expect: () => [isA<TimerRunning>()],
       verify: (_) {
         verify(mockStartTimerUseCase(any)).called(1);
       },
@@ -101,15 +98,13 @@ void main() {
     blocTest<TimerBloc, TimerState>(
       'emits TimerError when StartTimer fails',
       build: () {
-        when(mockStartTimerUseCase(any)).thenAnswer(
-          (_) async => const Error<TimeLog>(ServerFailure()),
-        );
+        when(
+          mockStartTimerUseCase(any),
+        ).thenAnswer((_) async => const Error<TimeLog>(ServerFailure()));
         return timerBloc;
       },
       act: (bloc) => bloc.add(const StartTimer('task1')),
-      expect: () => [
-        const TimerError(ServerFailure()),
-      ],
+      expect: () => [const TimerError(ServerFailure())],
     );
 
     blocTest<TimerBloc, TimerState>(
@@ -121,9 +116,9 @@ void main() {
           startTime: dummyDateTime.subtract(const Duration(seconds: 30)),
           endTime: dummyDateTime,
         );
-        when(mockPauseTimerUseCase(any)).thenAnswer(
-          (_) async => Success(timeLog),
-        );
+        when(
+          mockPauseTimerUseCase(any),
+        ).thenAnswer((_) async => Success(timeLog));
         return timerBloc;
       },
       seed: () => TimerRunning(
@@ -135,17 +130,15 @@ void main() {
         elapsedSeconds: 30,
       ),
       act: (bloc) => bloc.add(const PauseTimer()),
-      expect: () => [
-        isA<TimerPaused>(),
-      ],
+      expect: () => [isA<TimerPaused>()],
     );
 
     blocTest<TimerBloc, TimerState>(
       'emits TimerError when PauseTimer fails',
       build: () {
-        when(mockPauseTimerUseCase(any)).thenAnswer(
-          (_) async => const Error<TimeLog>(ServerFailure()),
-        );
+        when(
+          mockPauseTimerUseCase(any),
+        ).thenAnswer((_) async => const Error<TimeLog>(ServerFailure()));
         return timerBloc;
       },
       seed: () => TimerRunning(
@@ -157,9 +150,7 @@ void main() {
         elapsedSeconds: 0,
       ),
       act: (bloc) => bloc.add(const PauseTimer()),
-      expect: () => [
-        const TimerError(ServerFailure()),
-      ],
+      expect: () => [const TimerError(ServerFailure())],
     );
 
     blocTest<TimerBloc, TimerState>(
@@ -170,16 +161,14 @@ void main() {
           taskId: 'task1',
           startTime: dummyDateTime,
         );
-        when(mockResumeTimerUseCase(any)).thenAnswer(
-          (_) async => Success(timeLog),
-        );
+        when(
+          mockResumeTimerUseCase(any),
+        ).thenAnswer((_) async => Success(timeLog));
         return timerBloc;
       },
       act: (bloc) => bloc.add(const ResumeTimer('task1')),
       wait: const Duration(milliseconds: 100),
-      expect: () => [
-        isA<TimerRunning>(),
-      ],
+      expect: () => [isA<TimerRunning>()],
     );
 
     blocTest<TimerBloc, TimerState>(
@@ -191,9 +180,9 @@ void main() {
           startTime: dummyDateTime.subtract(const Duration(seconds: 60)),
           endTime: dummyDateTime,
         );
-        when(mockStopTimerUseCase(any)).thenAnswer(
-          (_) async => Success(timeLog),
-        );
+        when(
+          mockStopTimerUseCase(any),
+        ).thenAnswer((_) async => Success(timeLog));
         return timerBloc;
       },
       seed: () => TimerRunning(
@@ -205,23 +194,19 @@ void main() {
         elapsedSeconds: 60,
       ),
       act: (bloc) => bloc.add(const StopTimer()),
-      expect: () => [
-        isA<TimerStopped>(),
-      ],
+      expect: () => [isA<TimerStopped>()],
     );
 
     blocTest<TimerBloc, TimerState>(
       'emits TimerInitial when LoadActiveTimer finds no active timer',
       build: () {
-        when(mockGetActiveTimerUseCase(any)).thenAnswer(
-          (_) async => Success<TimeLog?>(null),
-        );
+        when(
+          mockGetActiveTimerUseCase(any),
+        ).thenAnswer((_) async => Success<TimeLog?>(null));
         return timerBloc;
       },
       act: (bloc) => bloc.add(const LoadActiveTimer()),
-      expect: () => [
-        const TimerInitial(),
-      ],
+      expect: () => [const TimerInitial()],
     );
 
     blocTest<TimerBloc, TimerState>(
@@ -232,16 +217,14 @@ void main() {
           taskId: 'task1',
           startTime: dummyDateTime.subtract(const Duration(seconds: 30)),
         );
-        when(mockGetActiveTimerUseCase(any)).thenAnswer(
-          (_) async => Success<TimeLog?>(activeTimer),
-        );
+        when(
+          mockGetActiveTimerUseCase(any),
+        ).thenAnswer((_) async => Success<TimeLog?>(activeTimer));
         return timerBloc;
       },
       act: (bloc) => bloc.add(const LoadActiveTimer()),
       wait: const Duration(milliseconds: 100),
-      expect: () => [
-        isA<TimerRunning>(),
-      ],
+      expect: () => [isA<TimerRunning>()],
     );
 
     blocTest<TimerBloc, TimerState>(
@@ -262,9 +245,7 @@ void main() {
         });
       },
       wait: const Duration(milliseconds: 200),
-      expect: () => [
-        isA<TimerRunning>(),
-      ],
+      expect: () => [isA<TimerRunning>()],
     );
 
     blocTest<TimerBloc, TimerState>(
@@ -276,4 +257,3 @@ void main() {
     );
   });
 }
-

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:time_tracking_kanaban/core/usecases/usecase.dart';
@@ -54,10 +53,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   /// Handles the [StartTimer] event.
-  Future<void> _onStartTimer(
-    StartTimer event,
-    Emitter<TimerState> emit,
-  ) async {
+  Future<void> _onStartTimer(StartTimer event, Emitter<TimerState> emit) async {
     // Stop any existing ticker
     await _tickerSubscription?.cancel();
     _tickerSubscription = null;
@@ -74,10 +70,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   /// Handles the [PauseTimer] event.
-  Future<void> _onPauseTimer(
-    PauseTimer event,
-    Emitter<TimerState> emit,
-  ) async {
+  Future<void> _onPauseTimer(PauseTimer event, Emitter<TimerState> emit) async {
     // Stop the ticker
     await _tickerSubscription?.cancel();
     _tickerSubscription = null;
@@ -91,10 +84,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
     final timeLog = (result as Success<TimeLog>).value;
     final elapsedSeconds = _calculateElapsedSeconds(timeLog);
-    emit(TimerPaused(
-      timeLog: timeLog,
-      elapsedSeconds: elapsedSeconds,
-    ));
+    emit(TimerPaused(timeLog: timeLog, elapsedSeconds: elapsedSeconds));
   }
 
   /// Handles the [ResumeTimer] event.
@@ -118,10 +108,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   /// Handles the [StopTimer] event.
-  Future<void> _onStopTimer(
-    StopTimer event,
-    Emitter<TimerState> emit,
-  ) async {
+  Future<void> _onStopTimer(StopTimer event, Emitter<TimerState> emit) async {
     // Stop the ticker
     await _tickerSubscription?.cancel();
     _tickerSubscription = null;
@@ -135,24 +122,20 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
     final timeLog = (result as Success<TimeLog>).value;
     final elapsedSeconds = _calculateElapsedSeconds(timeLog);
-    emit(TimerStopped(
-      timeLog: timeLog,
-      elapsedSeconds: elapsedSeconds,
-    ));
+    emit(TimerStopped(timeLog: timeLog, elapsedSeconds: elapsedSeconds));
   }
 
   /// Handles the [TimerTick] event.
-  void _onTimerTick(
-    TimerTick event,
-    Emitter<TimerState> emit,
-  ) {
+  void _onTimerTick(TimerTick event, Emitter<TimerState> emit) {
     final currentState = state;
     if (currentState is TimerRunning) {
       final elapsedSeconds = _calculateElapsedSeconds(currentState.timeLog);
-      emit(TimerRunning(
-        timeLog: currentState.timeLog,
-        elapsedSeconds: elapsedSeconds,
-      ));
+      emit(
+        TimerRunning(
+          timeLog: currentState.timeLog,
+          elapsedSeconds: elapsedSeconds,
+        ),
+      );
     }
   }
 
@@ -185,18 +168,15 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
     // Calculate initial elapsed time
     final initialElapsedSeconds = _calculateElapsedSeconds(timeLog);
-    emit(TimerRunning(
-      timeLog: timeLog,
-      elapsedSeconds: initialElapsedSeconds,
-    ));
+    emit(TimerRunning(timeLog: timeLog, elapsedSeconds: initialElapsedSeconds));
 
     // Start ticker for 1-second updates
-    _tickerSubscription = Stream.periodic(
-      const Duration(seconds: 1),
-      (count) => count,
-    ).listen((_) {
-      add(const TimerTick());
-    });
+    _tickerSubscription =
+        Stream.periodic(const Duration(seconds: 1), (count) => count).listen((
+          _,
+        ) {
+          add(const TimerTick());
+        });
   }
 
   /// Calculates the elapsed time in seconds for a time log.
@@ -211,4 +191,3 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     return super.close();
   }
 }
-

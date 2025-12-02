@@ -22,13 +22,13 @@ class MoveTaskEvent extends KanbanEvent {
   /// The target project ID.
   final String projectId;
 
-  /// The target section ID.
-  final String sectionId;
+  /// The target section ID (null for tasks without section).
+  final String? sectionId;
 
   const MoveTaskEvent({
     required this.task,
     required this.projectId,
-    required this.sectionId,
+    this.sectionId,
   });
 
   @override
@@ -66,5 +66,16 @@ class CloseTaskEvent extends KanbanEvent {
 
   @override
   List<Object?> get props => [task];
+}
+
+/// Event to delete a task.
+class DeleteTaskEvent extends KanbanEvent {
+  /// The ID of the task to delete.
+  final String taskId;
+
+  const DeleteTaskEvent(this.taskId);
+
+  @override
+  List<Object?> get props => [taskId];
 }
 

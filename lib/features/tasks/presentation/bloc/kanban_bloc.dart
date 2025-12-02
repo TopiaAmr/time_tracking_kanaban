@@ -1,16 +1,17 @@
 import 'dart:async';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:time_tracking_kanaban/core/usecases/usecase.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
+import 'package:time_tracking_kanaban/features/tasks/domain/entities/section.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/add_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/close_task_usecase.dart';
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/delete_task_usecase.dart';
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_sections_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/move_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/update_task_usecase.dart';
-import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart';
-import 'package:time_tracking_kanaban/features/timer/domain/usecases/get_active_timer_usecase.dart';
 import 'kanban_event.dart';
 import 'kanban_state.dart';
 
@@ -36,8 +37,11 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
   /// Use case for closing a task.
   final CloseTaskUseCase _closeTask;
 
-  /// Use case for getting the active timer.
-  final GetActiveTimerUseCase _getActiveTimer;
+  /// Use case for deleting a task.
+  final DeleteTaskUseCase _deleteTask;
+
+  /// Use case for getting all sections.
+  final GetSections _getSections;
 
   /// Creates a [KanbanBloc] with the required use cases.
   KanbanBloc(
@@ -46,13 +50,15 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     this._addTask,
     this._updateTask,
     this._closeTask,
-    this._getActiveTimer,
+    this._deleteTask,
+    this._getSections,
   ) : super(const KanbanInitial()) {
     on<LoadKanbanTasks>(_onLoadKanbanTasks);
     on<MoveTaskEvent>(_onMoveTask);
     on<CreateTask>(_onCreateTask);
     on<UpdateTaskEvent>(_onUpdateTask);
     on<CloseTaskEvent>(_onCloseTask);
+    on<DeleteTaskEvent>(_onDeleteTask);
   }
 
   /// Handles the [LoadKanbanTasks] event.
@@ -63,7 +69,7 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     emit(const KanbanLoading());
 
     final tasksResult = await _getTasks(NoParams());
-    final activeTimerResult = await _getActiveTimer(NoParams());
+    final sectionsResult = await _getSections(NoParams());
 
     if (tasksResult is Error<List<Task>>) {
       emit(KanbanError(tasksResult.failure));
@@ -71,16 +77,16 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     }
 
     final tasks = (tasksResult as Success<List<Task>>).value;
-    final activeTimer = activeTimerResult is Success<TimeLog?>
-        ? activeTimerResult.value
-        : null;
+    final sections = sectionsResult is Success<List<Section>>
+        ? sectionsResult.value
+        : <Section>[];
 
-    final groupedTasks = _groupTasksIntoColumns(tasks, activeTimer);
+    final groupedTasks = _groupTasksBySections(tasks, sections);
     emit(
       KanbanLoaded(
-        toDoTasks: groupedTasks['toDo'] ?? [],
-        inProgressTasks: groupedTasks['inProgress'] ?? [],
-        doneTasks: groupedTasks['done'] ?? [],
+        tasksBySection: groupedTasks['bySection'] as Map<String, List<Task>>,
+        tasksWithoutSection: groupedTasks['withoutSection'] as List<Task>,
+        sections: sections,
       ),
     );
   }
@@ -90,8 +96,8 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     MoveTaskEvent event,
     Emitter<KanbanState> emit,
   ) async {
-    emit(const KanbanLoading());
-
+    // Don't emit loading state - we want instant feedback
+    // Update local database first (offline-first approach)
     final result = await _moveTask(
       MoveTaskParams(
         task: event.task,
@@ -101,12 +107,58 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     );
 
     if (result is Error<Task>) {
+      // Only show error if local update fails
       emit(KanbanError(result.failure));
       return;
     }
 
-    // Reload tasks after moving
-    add(const LoadKanbanTasks());
+    // Optimistically update the state immediately from current state
+    if (state is KanbanLoaded) {
+      final currentState = state as KanbanLoaded;
+      final updatedTask = (result as Success<Task>).value;
+
+      // Create updated task lists
+      final updatedTasksBySection = Map<String, List<Task>>.from(
+        currentState.tasksBySection,
+      );
+      final updatedTasksWithoutSection = List<Task>.from(
+        currentState.tasksWithoutSection,
+      );
+
+      // Remove task from old location
+      if (event.task.sectionId.isNotEmpty &&
+          updatedTasksBySection.containsKey(event.task.sectionId)) {
+        final sectionId = event.task.sectionId;
+        updatedTasksBySection[sectionId] = updatedTasksBySection[sectionId]!
+            .where((t) => t.id != event.task.id)
+            .toList();
+      } else {
+        updatedTasksWithoutSection.removeWhere((t) => t.id == event.task.id);
+      }
+
+      // Add task to new location
+      if (updatedTask.sectionId.isNotEmpty) {
+        updatedTasksBySection
+            .putIfAbsent(updatedTask.sectionId, () => [])
+            .add(updatedTask);
+      } else {
+        updatedTasksWithoutSection.add(updatedTask);
+      }
+
+      // Emit updated state immediately (no loading indicator)
+      emit(
+        KanbanLoaded(
+          tasksBySection: updatedTasksBySection,
+          tasksWithoutSection: updatedTasksWithoutSection,
+          sections: currentState.sections,
+        ),
+      );
+    } else {
+      // If not in loaded state, reload tasks
+      add(const LoadKanbanTasks());
+    }
+    // Note: API sync happens in background via repository
+    // The optimistic update above provides instant feedback
   }
 
   /// Handles the [CreateTask] event.
@@ -114,8 +166,7 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     CreateTask event,
     Emitter<KanbanState> emit,
   ) async {
-    emit(const KanbanLoading());
-
+    // Don't emit loading state - update optimistically
     final result = await _addTask(AddTaskParams(event.task));
 
     if (result is Error<Task>) {
@@ -123,8 +174,38 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       return;
     }
 
-    // Reload tasks after creating
-    add(const LoadKanbanTasks());
+    // Optimistically add task to current state
+    if (state is KanbanLoaded) {
+      final currentState = state as KanbanLoaded;
+      final newTask = (result as Success<Task>).value;
+
+      final updatedTasksBySection = Map<String, List<Task>>.from(
+        currentState.tasksBySection,
+      );
+      final updatedTasksWithoutSection = List<Task>.from(
+        currentState.tasksWithoutSection,
+      );
+
+      // Add task to appropriate location
+      if (newTask.sectionId.isNotEmpty) {
+        updatedTasksBySection
+            .putIfAbsent(newTask.sectionId, () => [])
+            .add(newTask);
+      } else {
+        updatedTasksWithoutSection.add(newTask);
+      }
+
+      emit(
+        KanbanLoaded(
+          tasksBySection: updatedTasksBySection,
+          tasksWithoutSection: updatedTasksWithoutSection,
+          sections: currentState.sections,
+        ),
+      );
+    } else {
+      // If not in loaded state, reload tasks
+      add(const LoadKanbanTasks());
+    }
   }
 
   /// Handles the [UpdateTaskEvent] event.
@@ -132,8 +213,7 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     UpdateTaskEvent event,
     Emitter<KanbanState> emit,
   ) async {
-    emit(const KanbanLoading());
-
+    // Don't emit loading state - update optimistically
     final result = await _updateTask(UpdateTaskParams(event.task));
 
     if (result is Error<Task>) {
@@ -141,8 +221,55 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       return;
     }
 
-    // Reload tasks after updating
-    add(const LoadKanbanTasks());
+    // Optimistically update task in current state
+    if (state is KanbanLoaded) {
+      final currentState = state as KanbanLoaded;
+      final updatedTask = (result as Success<Task>).value;
+
+      final updatedTasksBySection = Map<String, List<Task>>.from(
+        currentState.tasksBySection,
+      );
+      final updatedTasksWithoutSection = List<Task>.from(
+        currentState.tasksWithoutSection,
+      );
+
+      // Update task in its current location
+      bool found = false;
+      if (updatedTask.sectionId.isNotEmpty &&
+          updatedTasksBySection.containsKey(updatedTask.sectionId)) {
+        final index = updatedTasksBySection[updatedTask.sectionId]!.indexWhere(
+          (t) => t.id == updatedTask.id,
+        );
+        if (index != -1) {
+          updatedTasksBySection[updatedTask.sectionId]![index] = updatedTask;
+          found = true;
+        }
+      } else {
+        final index = updatedTasksWithoutSection.indexWhere(
+          (t) => t.id == updatedTask.id,
+        );
+        if (index != -1) {
+          updatedTasksWithoutSection[index] = updatedTask;
+          found = true;
+        }
+      }
+
+      if (found) {
+        emit(
+          KanbanLoaded(
+            tasksBySection: updatedTasksBySection,
+            tasksWithoutSection: updatedTasksWithoutSection,
+            sections: currentState.sections,
+          ),
+        );
+      } else {
+        // Task not found, reload
+        add(const LoadKanbanTasks());
+      }
+    } else {
+      // If not in loaded state, reload tasks
+      add(const LoadKanbanTasks());
+    }
   }
 
   /// Handles the [CloseTaskEvent] event.
@@ -150,8 +277,7 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     CloseTaskEvent event,
     Emitter<KanbanState> emit,
   ) async {
-    emit(const KanbanLoading());
-
+    // Don't emit loading state - update optimistically
     final result = await _closeTask(CloseTaskParams(event.task));
 
     if (result is Error<Task>) {
@@ -159,36 +285,130 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       return;
     }
 
-    // Reload tasks after closing
-    add(const LoadKanbanTasks());
+    // Optimistically remove task from current state (closed tasks are typically hidden)
+    if (state is KanbanLoaded) {
+      final currentState = state as KanbanLoaded;
+
+      final updatedTasksBySection = Map<String, List<Task>>.from(
+        currentState.tasksBySection,
+      );
+      final updatedTasksWithoutSection = List<Task>.from(
+        currentState.tasksWithoutSection,
+      );
+
+      // Remove task from its location
+      bool removed = false;
+      if (event.task.sectionId.isNotEmpty &&
+          updatedTasksBySection.containsKey(event.task.sectionId)) {
+        final sectionId = event.task.sectionId;
+        updatedTasksBySection[sectionId] = updatedTasksBySection[sectionId]!
+            .where((t) => t.id != event.task.id)
+            .toList();
+        removed = true;
+      } else {
+        updatedTasksWithoutSection.removeWhere((t) => t.id == event.task.id);
+        removed = true;
+      }
+
+      if (removed) {
+        emit(
+          KanbanLoaded(
+            tasksBySection: updatedTasksBySection,
+            tasksWithoutSection: updatedTasksWithoutSection,
+            sections: currentState.sections,
+          ),
+        );
+      } else {
+        // Task not found, reload
+        add(const LoadKanbanTasks());
+      }
+    } else {
+      // If not in loaded state, reload tasks
+      add(const LoadKanbanTasks());
+    }
   }
 
-  /// Groups tasks into Kanban columns based on their status and active timer.
-  ///
-  /// Returns a map with keys: 'toDo', 'inProgress', 'done'
-  Map<String, List<Task>> _groupTasksIntoColumns(
-    List<Task> tasks,
-    TimeLog? activeTimer,
-  ) {
-    final toDo = <Task>[];
-    final inProgress = <Task>[];
-    final done = <Task>[];
+  /// Handles the [DeleteTaskEvent] event.
+  Future<void> _onDeleteTask(
+    DeleteTaskEvent event,
+    Emitter<KanbanState> emit,
+  ) async {
+    final result = await _deleteTask(DeleteTaskParams(event.taskId));
 
-    final activeTaskId = activeTimer?.taskId;
+    if (result is Error<void>) {
+      emit(KanbanError(result.failure));
+      return;
+    }
+
+    // Optimistically remove task from current state
+    if (state is KanbanLoaded) {
+      final currentState = state as KanbanLoaded;
+
+      final updatedTasksBySection = Map<String, List<Task>>.from(
+        currentState.tasksBySection,
+      );
+      final updatedTasksWithoutSection = List<Task>.from(
+        currentState.tasksWithoutSection,
+      );
+
+      // Remove task from its location
+      bool removed = false;
+      for (final sectionId in updatedTasksBySection.keys) {
+        final beforeLength = updatedTasksBySection[sectionId]!.length;
+        updatedTasksBySection[sectionId] = updatedTasksBySection[sectionId]!
+            .where((t) => t.id != event.taskId)
+            .toList();
+        if (updatedTasksBySection[sectionId]!.length < beforeLength) {
+          removed = true;
+          break;
+        }
+      }
+
+      if (!removed) {
+        final beforeLength = updatedTasksWithoutSection.length;
+        updatedTasksWithoutSection.removeWhere((t) => t.id == event.taskId);
+        removed = updatedTasksWithoutSection.length < beforeLength;
+      }
+
+      if (removed) {
+        emit(
+          KanbanLoaded(
+            tasksBySection: updatedTasksBySection,
+            tasksWithoutSection: updatedTasksWithoutSection,
+            sections: currentState.sections,
+          ),
+        );
+      } else {
+        // Task not found, reload
+        add(const LoadKanbanTasks());
+      }
+    } else {
+      // If not in loaded state, reload tasks
+      add(const LoadKanbanTasks());
+    }
+  }
+
+  /// Groups tasks by sections.
+  ///
+  /// Returns a map with keys: 'bySection' (Map&lt;String, List&lt;Task&gt;&gt;) and 'withoutSection' (List&lt;Task&gt;)
+  Map<String, dynamic> _groupTasksBySections(
+    List<Task> tasks,
+    List<Section> sections,
+  ) {
+    final tasksBySection = <String, List<Task>>{};
+    final tasksWithoutSection = <Task>[];
+
+    // Create a set of valid section IDs
+    final validSectionIds = {for (final section in sections) section.id};
 
     for (final task in tasks) {
-      if (task.checked) {
-        // Task is completed -> Done column
-        done.add(task);
-      } else if (activeTaskId != null && task.id == activeTaskId) {
-        // Task has active timer -> In Progress column
-        inProgress.add(task);
+      if (task.sectionId.isEmpty || !validSectionIds.contains(task.sectionId)) {
+        tasksWithoutSection.add(task);
       } else {
-        // Task is not completed and has no active timer -> To Do column
-        toDo.add(task);
+        tasksBySection.putIfAbsent(task.sectionId, () => []).add(task);
       }
     }
 
-    return {'toDo': toDo, 'inProgress': inProgress, 'done': done};
+    return {'bySection': tasksBySection, 'withoutSection': tasksWithoutSection};
   }
 }

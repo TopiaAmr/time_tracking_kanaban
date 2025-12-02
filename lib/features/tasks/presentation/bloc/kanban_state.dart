@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:time_tracking_kanaban/core/errors/failure.dart';
+import 'package:time_tracking_kanaban/features/tasks/domain/entities/section.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 
 /// Base class for Kanban board states.
@@ -22,23 +23,23 @@ class KanbanLoading extends KanbanState {
 
 /// State when tasks have been successfully loaded and grouped into columns.
 class KanbanLoaded extends KanbanState {
-  /// Tasks in the "To Do" column.
-  final List<Task> toDoTasks;
+  /// Map of section ID to list of tasks in that section.
+  final Map<String, List<Task>> tasksBySection;
 
-  /// Tasks in the "In Progress" column.
-  final List<Task> inProgressTasks;
+  /// Tasks without a section (sectionId is empty or invalid).
+  final List<Task> tasksWithoutSection;
 
-  /// Tasks in the "Done" column.
-  final List<Task> doneTasks;
+  /// All sections available in the project, sorted by sectionOrder.
+  final List<Section> sections;
 
   const KanbanLoaded({
-    required this.toDoTasks,
-    required this.inProgressTasks,
-    required this.doneTasks,
+    required this.tasksBySection,
+    required this.tasksWithoutSection,
+    required this.sections,
   });
 
   @override
-  List<Object?> get props => [toDoTasks, inProgressTasks, doneTasks];
+  List<Object?> get props => [tasksBySection, tasksWithoutSection, sections];
 }
 
 /// State when an error occurs.
