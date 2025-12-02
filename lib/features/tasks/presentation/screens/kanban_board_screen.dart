@@ -34,11 +34,18 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
   List<String> _selectedAssignedUsers = [];
   String? _selectedCompany;
   String? _selectedTaskType;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     context.read<KanbanBloc>().add(const LoadKanbanTasks());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -50,11 +57,11 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
       header: AppHeader(
         title: context.l10n.navTasks,
         searchQuery: _searchQuery,
+        searchController: _searchController,
         onSearchChanged: (query) {
           setState(() {
             _searchQuery = query;
           });
-          // Search filtering - will be implemented when filter logic is added
         },
         filtersOpen: _filtersOpen,
         onToggleFilters: () {
@@ -169,9 +176,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
         builder: (context, scrollController) => Container(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
@@ -181,7 +186,9 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -293,6 +300,21 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
     );
   }
 
+  /// Filter tasks based on search query.
+  /// Searches in task content and description fields.
+  List<Task> _filterTasks(List<Task> tasks) {
+    if (_searchQuery == null || _searchQuery!.trim().isEmpty) {
+      return tasks;
+    }
+
+    final query = _searchQuery!.toLowerCase().trim();
+    return tasks.where((task) {
+      final content = task.content.toLowerCase();
+      final description = task.description.toLowerCase();
+      return content.contains(query) || description.contains(query);
+    }).toList();
+  }
+
   Widget _buildKanbanBoard(BuildContext context, KanbanLoaded state) {
     final isMobile = context.isMobile;
 
@@ -303,9 +325,10 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
     // Build columns for each section
     final sectionColumns = sortedSections.map((section) {
       final tasks = state.tasksBySection[section.id] ?? [];
+      final filteredTasks = _filterTasks(tasks);
       return KanbanColumn(
         section: section,
-        tasks: tasks,
+        tasks: filteredTasks,
         onTaskTap: (task) {
           context.go('${RouteNames.tasks}/${task.id}');
         },
@@ -315,11 +338,12 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
     }).toList();
 
     // Add column for tasks without section if there are any
-    if (state.tasksWithoutSection.isNotEmpty) {
+    final filteredTasksWithoutSection = _filterTasks(state.tasksWithoutSection);
+    if (filteredTasksWithoutSection.isNotEmpty) {
       sectionColumns.add(
         KanbanColumn(
           section: null,
-          tasks: state.tasksWithoutSection,
+          tasks: filteredTasksWithoutSection,
           onTaskTap: (task) {
             context.go('${RouteNames.tasks}/${task.id}');
           },

@@ -19,6 +19,9 @@ class AppHeader extends StatelessWidget {
   /// Callback when search changes.
   final ValueChanged<String>? onSearchChanged;
 
+  /// Optional search controller for managing text field state.
+  final TextEditingController? searchController;
+
   /// Whether filters panel is open.
   final bool filtersOpen;
 
@@ -36,6 +39,7 @@ class AppHeader extends StatelessWidget {
     required this.title,
     this.searchQuery,
     this.onSearchChanged,
+    this.searchController,
     this.filtersOpen = false,
     this.onToggleFilters,
     this.showBackButton = false,
@@ -97,7 +101,7 @@ class AppHeader extends StatelessWidget {
                     width: 300,
                     child: TextField(
                       onChanged: onSearchChanged,
-                      controller: TextEditingController(text: searchQuery),
+                      controller: searchController ?? TextEditingController(text: searchQuery),
                       decoration: InputDecoration(
                         hintText: context.l10n.searchPlaceholder,
                         prefixIcon: const Icon(Icons.search),
@@ -139,7 +143,7 @@ class AppHeader extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       onChanged: onSearchChanged,
-                      controller: TextEditingController(text: searchQuery),
+                      controller: searchController ?? TextEditingController(text: searchQuery),
                       decoration: InputDecoration(
                         hintText: context.l10n.searchPlaceholder,
                         prefixIcon: const Icon(Icons.search),
