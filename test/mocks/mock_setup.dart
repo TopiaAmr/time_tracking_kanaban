@@ -1,8 +1,11 @@
 import 'package:mockito/mockito.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
+import 'package:time_tracking_kanaban/features/tasks/domain/entities/comment.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/project.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/section.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
+import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
+import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart';
 
 // Provide dummy values for Result<T> sealed class
 // This function should be called before using mocks
@@ -84,6 +87,49 @@ void setupMockDummyValues() {
   );
 
   provideDummy<Result<List<Section>>>(const Success(<Section>[]));
+
+  // Timer entities
+  provideDummy<Result<TimeLog>>(
+    Success(
+      TimeLog(id: '', taskId: '', startTime: dummyDateTime, endTime: null),
+    ),
+  );
+
+  provideDummy<Result<TimeLog?>>(Success<TimeLog?>(null));
+
+  provideDummy<Result<List<TimeLog>>>(const Success(<TimeLog>[]));
+
+  provideDummy<Result<TaskTimerSummary>>(
+    Success(
+      const TaskTimerSummary(
+        taskId: '',
+        totalTrackedSeconds: 0,
+        hasActiveTimer: false,
+      ),
+    ),
+  );
+
+  provideDummy<Result<List<TaskTimerSummary>>>(
+    const Success(<TaskTimerSummary>[]),
+  );
+
+  // Comment entities
+  provideDummy<Result<Comment>>(
+    Success(
+      Comment(
+        id: '',
+        taskId: '',
+        content: '',
+        createdAt: dummyDateTime,
+        updatedAt: dummyDateTime,
+        authorId: '',
+        authorName: null,
+        isSynced: true,
+      ),
+    ),
+  );
+
+  provideDummy<Result<List<Comment>>>(const Success(<Comment>[]));
 
   // For Result<void>, we use null cast to dynamic since void can't have a value
   provideDummy<Result<void>>(Success<void>(null as dynamic));

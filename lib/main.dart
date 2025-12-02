@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:time_tracking_kanaban/di.dart';
 
-void main() {
+/// Entry point of the application.
+///
+/// Initializes Flutter bindings, loads environment variables,
+/// configures dependency injection, and runs the application.
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables from .env file
+  await dotenv.load(fileName: '.env');
+  
   configureDependencies();
   runApp(const MyApp());
 }
 
+/// Root widget of the application.
+///
+/// This widget is the top-level widget that configures the Material app
+/// theme and sets up the initial route.
 class MyApp extends StatelessWidget {
+  /// Creates a [MyApp] instance.
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -38,27 +51,33 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// The home page widget of the application.
+///
+/// This is a stateful widget that displays a counter and allows users
+/// to increment it. This is a placeholder implementation that should
+/// be replaced with the actual application UI.
 class MyHomePage extends StatefulWidget {
+  /// Creates a [MyHomePage] with the given [title].
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+  /// The title to display in the app bar.
   final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+/// The state for [MyHomePage].
+///
+/// This manages the counter state and provides the UI for the home page.
 class _MyHomePageState extends State<MyHomePage> {
+  /// The current counter value.
   int _counter = 0;
 
+  /// Increments the counter and triggers a rebuild.
+  ///
+  /// This method updates the counter state, which causes the UI to
+  /// rebuild and display the new value.
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -72,12 +91,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to

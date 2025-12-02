@@ -5,19 +5,29 @@ import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/repository/tasks_repository.dart';
 import 'package:equatable/equatable.dart';
 
+/// Parameters for the [CloseTask] use case.
 class CloseTaskParams extends Equatable {
+  /// The task to close.
   final Task task;
 
+  /// Creates [CloseTaskParams] with the given [task].
   const CloseTaskParams(this.task);
 
   @override
   List<Object?> get props => [task];
 }
 
+/// Use case for closing (completing) a task.
+///
+/// This use case marks a task as completed by setting its `checked` flag
+/// to `true` and updating the `completedAt` timestamp. The updated task
+/// is returned.
 @lazySingleton
 class CloseTask implements UseCase<Task, CloseTaskParams> {
+  /// The repository to update the task in.
   final TasksRepository repository;
 
+  /// Creates a [CloseTask] use case with the given [repository].
   CloseTask(this.repository);
 
   @override
