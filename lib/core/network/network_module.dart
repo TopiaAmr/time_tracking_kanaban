@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
-import 'package:time_tracking_kanaban/core/network/todoist_api.dart';
+import 'package:time_tracking_kanaban/features/tasks/data/datasources/todoist_api.dart';
 import 'package:time_tracking_kanaban/core/network/todoist_response_interceptor.dart';
 
 /// Dependency injection module for network-related dependencies.

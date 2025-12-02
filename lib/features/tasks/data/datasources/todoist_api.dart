@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import '../../features/tasks/data/models/project_model.dart';
-import '../../features/tasks/data/models/section_model.dart';
-import '../../features/tasks/data/models/task_model.dart';
-import '../../features/tasks/data/models/task_request_models.dart';
+import '../models/project_model.dart';
+import '../models/section_model.dart';
+import '../models/task_model.dart';
+import '../models/task_request_models.dart';
 
 part 'todoist_api.g.dart';
 

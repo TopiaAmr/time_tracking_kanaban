@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:time_tracking_kanaban/core/network/todoist_api.dart';
+import 'package:time_tracking_kanaban/features/tasks/data/datasources/todoist_api.dart';
 import 'package:time_tracking_kanaban/core/network/todoist_response_interceptor.dart';
 import 'package:time_tracking_kanaban/features/tasks/data/models/task_request_models.dart';
 import 'package:logger/logger.dart';
@@ -136,3 +136,4 @@ void main() {
     timeout: const Timeout(Duration(seconds: 60)),
   );
 }
+

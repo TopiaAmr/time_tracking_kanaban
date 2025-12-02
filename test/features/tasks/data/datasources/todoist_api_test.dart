@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http_mock_adapter/http_mock_adapter.dart';
-import 'package:time_tracking_kanaban/core/network/todoist_api.dart';
+import 'package:time_tracking_kanaban/features/tasks/data/datasources/todoist_api.dart';
 import 'package:time_tracking_kanaban/features/tasks/data/models/project_model.dart';
 import 'package:time_tracking_kanaban/features/tasks/data/models/section_model.dart';
 import 'package:time_tracking_kanaban/features/tasks/data/models/task_model.dart';
@@ -510,3 +510,4 @@ void main() {
     });
   });
 }
+

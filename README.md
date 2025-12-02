@@ -166,7 +166,7 @@ Integration tests are configured to use mock data by default. To run tests again
 3. Run the integration tests:
 
 ```bash
-flutter test test/core/network/todoist_api_integration_test.dart
+flutter test test/features/tasks/data/datasources/todoist_api_integration_test.dart
 ```
 
 **Note**: Integration tests that use the real API may create test data in your Todoist account. Tests attempt to clean up, but use caution.

@@ -14,7 +14,7 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
 import 'core/network/network_module.dart' as _i550;
-import 'core/network/todoist_api.dart' as _i986;
+import 'features/tasks/data/datasources/todoist_api.dart' as _i381;
 import 'features/tasks/data/repositories/tasks_repository_impl.dart' as _i411;
 import 'features/tasks/domain/repository/comments_repository.dart' as _i861;
 import 'features/tasks/domain/repository/tasks_repository.dart' as _i81;
@@ -54,39 +54,9 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final networkModule = _$NetworkModule();
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
-    gh.lazySingleton<_i986.TodoistApi>(() => networkModule.todoistApi);
+    gh.lazySingleton<_i381.TodoistApi>(() => networkModule.todoistApi);
     gh.factory<_i81.TasksRepository>(
-      () => _i411.TasksRepositoryImpl(gh<_i986.TodoistApi>()),
-    );
-    gh.lazySingleton<_i923.AddTask>(
-      () => _i923.AddTask(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i460.CloseTask>(
-      () => _i460.CloseTask(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i555.GetProject>(
-      () => _i555.GetProject(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i91.GetProjects>(
-      () => _i91.GetProjects(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i220.GetSection>(
-      () => _i220.GetSection(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i362.GetSections>(
-      () => _i362.GetSections(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i264.GetTask>(
-      () => _i264.GetTask(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i951.GetTasks>(
-      () => _i951.GetTasks(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i584.MoveTask>(
-      () => _i584.MoveTask(gh<_i81.TasksRepository>()),
-    );
-    gh.lazySingleton<_i878.UpdateTask>(
-      () => _i878.UpdateTask(gh<_i81.TasksRepository>()),
+      () => _i411.TasksRepositoryImpl(gh<_i381.TodoistApi>()),
     );
     gh.lazySingleton<_i968.AddComment>(
       () => _i968.AddComment(gh<_i861.CommentsRepository>()),
@@ -123,6 +93,36 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i640.StopTimerUseCase>(
       () => _i640.StopTimerUseCase(gh<_i79.TimerRepository>()),
+    );
+    gh.lazySingleton<_i923.AddTask>(
+      () => _i923.AddTask(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i460.CloseTask>(
+      () => _i460.CloseTask(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i555.GetProject>(
+      () => _i555.GetProject(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i91.GetProjects>(
+      () => _i91.GetProjects(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i220.GetSection>(
+      () => _i220.GetSection(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i362.GetSections>(
+      () => _i362.GetSections(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i264.GetTask>(
+      () => _i264.GetTask(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i951.GetTasks>(
+      () => _i951.GetTasks(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i584.MoveTask>(
+      () => _i584.MoveTask(gh<_i81.TasksRepository>()),
+    );
+    gh.lazySingleton<_i878.UpdateTask>(
+      () => _i878.UpdateTask(gh<_i81.TasksRepository>()),
     );
     return this;
   }

@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:time_tracking_kanaban/core/errors/failure.dart';
-import 'package:time_tracking_kanaban/core/network/todoist_api.dart';
+import 'package:time_tracking_kanaban/features/tasks/data/datasources/todoist_api.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
 import 'package:time_tracking_kanaban/features/tasks/data/models/task_request_models.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/project.dart';
