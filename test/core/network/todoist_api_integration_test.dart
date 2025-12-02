@@ -21,8 +21,8 @@ import 'package:time_tracking_kanaban/features/tasks/data/models/task_request_mo
 /// To skip integration tests (use mock data only):
 /// Set USE_REAL_API=false in your .env file
 void main() {
-  late TodoistApi api;
-  late String? projectId;
+  TodoistApi? api;
+  String? projectId;
   String? createdTaskId;
   bool useRealApi = false;
 
@@ -72,9 +72,9 @@ void main() {
 
   tearDownAll(() async {
     // Clean up: Delete any tasks/sections created during tests
-    if (createdTaskId != null) {
+    if (createdTaskId != null && api != null) {
       try {
-        await api.deleteTask(createdTaskId!);
+        await api!.deleteTask(createdTaskId!);
       } catch (e) {
         // Ignore cleanup errors
         print('Warning: Failed to cleanup task $createdTaskId: $e');
@@ -83,19 +83,16 @@ void main() {
   });
 
   group('Integration Tests - Real API Calls', () {
-    // Helper function to skip test if real API is disabled
-    void skipIfMockMode() {
-      if (!useRealApi) {
-        // Skip test if real API is disabled
-        return;
-      }
+    // Helper function to check if test should be skipped
+    bool shouldSkipTest() {
+      return !useRealApi || api == null;
     }
 
     test('should get all projects from the API', () async {
-      skipIfMockMode();
+      if (shouldSkipTest()) return;
       // act
       try {
-        final projects = await api.getProjects();
+        final projects = await api!.getProjects();
 
         // assert
         expect(projects, isA<List>());
@@ -124,9 +121,9 @@ void main() {
     });
 
     test('should get a specific project by ID', () async {
-      skipIfMockMode();
+      if (shouldSkipTest()) return;
       // arrange
-      final projects = await api.getProjects();
+      final projects = await api!.getProjects();
       expect(
         projects.isNotEmpty,
         true,
@@ -135,7 +132,7 @@ void main() {
       final testProjectId = projects.first.id;
 
       // act
-      final project = await api.getProject(testProjectId);
+      final project = await api!.getProject(testProjectId);
 
       // assert
       expect(project.id, testProjectId);
@@ -144,9 +141,9 @@ void main() {
     });
 
     test('should get sections from the API', () async {
-      skipIfMockMode();
+      if (shouldSkipTest()) return;
       // act
-      final sections = await api.getSections();
+      final sections = await api!.getSections();
 
       // assert
       expect(sections, isA<List>());
@@ -161,7 +158,7 @@ void main() {
     });
 
     test('should get sections filtered by project ID', () async {
-      skipIfMockMode();
+      if (shouldSkipTest()) return;
       // arrange
       if (projectId == null || projectId!.isEmpty) {
         // Skip if PROJECT_ID is not set
@@ -170,7 +167,7 @@ void main() {
       }
 
       // act
-      final sections = await api.getSections(projectId: projectId);
+      final sections = await api!.getSections(projectId: projectId);
 
       // assert
       expect(sections, isA<List>());
@@ -183,9 +180,9 @@ void main() {
     });
 
     test('should get tasks from the API', () async {
-      skipIfMockMode();
+      if (shouldSkipTest()) return;
       // act
-      final tasks = await api.getTasks();
+      final tasks = await api!.getTasks();
 
       // assert
       expect(tasks, isA<List>());
@@ -200,7 +197,7 @@ void main() {
     });
 
     test('should get tasks filtered by project ID', () async {
-      skipIfMockMode();
+      if (shouldSkipTest()) return;
       // arrange
       if (projectId == null || projectId!.isEmpty) {
         // Skip if PROJECT_ID is not set
@@ -209,7 +206,7 @@ void main() {
       }
 
       // act
-      final tasks = await api.getTasks(projectId: projectId);
+      final tasks = await api!.getTasks(projectId: projectId);
 
       // assert
       expect(tasks, isA<List>());
@@ -224,7 +221,7 @@ void main() {
     test(
       'should create a new task via API',
       () async {
-        skipIfMockMode();
+        if (shouldSkipTest()) return;
         // arrange
         final taskBody = AddTaskBody(
           content:
@@ -234,7 +231,7 @@ void main() {
         );
 
         // act
-        final createdTask = await api.addTask(taskBody);
+        final createdTask = await api!.addTask(taskBody);
 
         // assert
         expect(createdTask.id, isNotEmpty);
@@ -253,7 +250,7 @@ void main() {
     test(
       'should get a specific task by ID',
       () async {
-        skipIfMockMode();
+        if (shouldSkipTest()) return;
         // arrange
         if (createdTaskId == null) {
           // Create a task first if we don't have one
@@ -262,12 +259,12 @@ void main() {
                 'Test Task for Get - ${DateTime.now().millisecondsSinceEpoch}',
             projectId: projectId,
           );
-          final createdTask = await api.addTask(taskBody);
+          final createdTask = await api!.addTask(taskBody);
           createdTaskId = createdTask.id;
         }
 
         // act
-        final task = await api.getTask(createdTaskId!);
+        final task = await api!.getTask(createdTaskId!);
 
         // assert
         expect(task.id, createdTaskId);
@@ -279,7 +276,7 @@ void main() {
     );
 
     test('should update a task via API', () async {
-      skipIfMockMode();
+      if (shouldSkipTest()) return;
       // arrange
       if (createdTaskId == null) {
         // Create a task first if we don't have one
@@ -288,7 +285,7 @@ void main() {
               'Test Task for Update - ${DateTime.now().millisecondsSinceEpoch}',
           projectId: projectId,
         );
-        final createdTask = await api.addTask(taskBody);
+        final createdTask = await api!.addTask(taskBody);
         createdTaskId = createdTask.id;
       }
 
@@ -300,7 +297,7 @@ void main() {
       );
 
       // act
-      final updatedTask = await api.updateTask(createdTaskId!, updateBody);
+      final updatedTask = await api!.updateTask(createdTaskId!, updateBody);
 
       // assert
       expect(updatedTask.id, createdTaskId);
@@ -312,7 +309,7 @@ void main() {
     test(
       'should close (complete) a task via API',
       () async {
-        skipIfMockMode();
+        if (shouldSkipTest()) return;
         // arrange
         if (createdTaskId == null) {
           // Create a task first if we don't have one
@@ -321,15 +318,15 @@ void main() {
                 'Test Task for Close - ${DateTime.now().millisecondsSinceEpoch}',
             projectId: projectId,
           );
-          final createdTask = await api.addTask(taskBody);
+          final createdTask = await api!.addTask(taskBody);
           createdTaskId = createdTask.id;
         }
 
         // act
-        await api.closeTask(createdTaskId!);
+        await api!.closeTask(createdTaskId!);
 
         // assert - verify task is completed
-        final task = await api.getTask(createdTaskId!);
+        final task = await api!.getTask(createdTaskId!);
         expect(
           task.checked,
           true,
@@ -343,7 +340,7 @@ void main() {
     test(
       'should move a task to a different project/section via API',
       () async {
-        skipIfMockMode();
+        if (shouldSkipTest()) return;
         // arrange
         if (projectId == null || projectId!.isEmpty) {
           print('⚠ Skipping test: PROJECT_ID not set in .env');
@@ -356,11 +353,11 @@ void main() {
               'Test Task for Move - ${DateTime.now().millisecondsSinceEpoch}',
           projectId: projectId,
         );
-        final createdTask = await api.addTask(taskBody);
+        final createdTask = await api!.addTask(taskBody);
         final taskIdToMove = createdTask.id;
 
         // Get sections for the project
-        final sections = await api.getSections(projectId: projectId);
+        final sections = await api!.getSections(projectId: projectId);
         final targetSectionId = sections.isNotEmpty ? sections.first.id : null;
 
         final moveBody = MoveTaskBody(
@@ -369,7 +366,7 @@ void main() {
         );
 
         // act
-        final movedTask = await api.moveTask(taskIdToMove, moveBody);
+        final movedTask = await api!.moveTask(taskIdToMove, moveBody);
 
         // assert
         expect(movedTask.id, taskIdToMove);
@@ -382,24 +379,24 @@ void main() {
         );
 
         // Cleanup
-        await api.deleteTask(taskIdToMove);
+        await api!.deleteTask(taskIdToMove);
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
 
     test('should delete a task via API', () async {
-      skipIfMockMode();
+      if (shouldSkipTest()) return;
       // arrange - create a task to delete
       final taskBody = AddTaskBody(
         content:
             'Test Task for Delete - ${DateTime.now().millisecondsSinceEpoch}',
         projectId: projectId,
       );
-      final createdTask = await api.addTask(taskBody);
+      final createdTask = await api!.addTask(taskBody);
       final taskIdToDelete = createdTask.id;
 
       // act
-      await api.deleteTask(taskIdToDelete);
+      await api!.deleteTask(taskIdToDelete);
 
       // assert - verify task is deleted
       // Note: The API might return 204 for delete, and the task might still be
@@ -407,7 +404,7 @@ void main() {
       // or by waiting a moment and checking again.
       await Future.delayed(const Duration(seconds: 1));
       try {
-        final task = await api.getTask(taskIdToDelete);
+        final task = await api!.getTask(taskIdToDelete);
         // If task is retrieved, check if it's marked as deleted
         if (task.isDeleted) {
           print('✓ Task marked as deleted: $taskIdToDelete');
@@ -415,7 +412,7 @@ void main() {
           // Try one more time after a delay
           await Future.delayed(const Duration(seconds: 2));
           try {
-            await api.getTask(taskIdToDelete);
+            await api!.getTask(taskIdToDelete);
             fail('Task should have been deleted');
           } on DioException catch (e) {
             if (e.response?.statusCode == 404) {
