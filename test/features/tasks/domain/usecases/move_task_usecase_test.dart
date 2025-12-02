@@ -8,13 +8,13 @@ import '../../../../mocks/mock_setup.dart';
 import '../../../../mocks/tasks_repository_mock.mocks.dart';
 
 void main() {
-  late MoveTask usecase;
+  late MoveTaskUseCase usecase;
   late MockTasksRepository mockRepository;
 
   setUp(() {
     setupMockDummyValues();
     mockRepository = MockTasksRepository();
-    usecase = MoveTask(mockRepository);
+    usecase = MoveTaskUseCase(mockRepository);
   });
 
   test('should move task via repository', () async {

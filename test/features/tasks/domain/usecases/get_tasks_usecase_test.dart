@@ -9,13 +9,13 @@ import '../../../../mocks/mock_setup.dart';
 import '../../../../mocks/tasks_repository_mock.mocks.dart';
 
 void main() {
-  late GetTasks usecase;
+  late GetTasksUseCase usecase;
   late MockTasksRepository mockRepository;
 
   setUp(() {
     setupMockDummyValues();
     mockRepository = MockTasksRepository();
-    usecase = GetTasks(mockRepository);
+    usecase = GetTasksUseCase(mockRepository);
   });
 
   test('should get list of tasks from repository', () async {

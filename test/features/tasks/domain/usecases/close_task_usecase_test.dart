@@ -8,13 +8,13 @@ import '../../../../mocks/mock_setup.dart';
 import '../../../../mocks/tasks_repository_mock.mocks.dart';
 
 void main() {
-  late CloseTask usecase;
+  late CloseTaskUseCase usecase;
   late MockTasksRepository mockRepository;
 
   setUp(() {
     setupMockDummyValues();
     mockRepository = MockTasksRepository();
-    usecase = CloseTask(mockRepository);
+    usecase = CloseTaskUseCase(mockRepository);
   });
 
   test('should close task via repository with updated fields', () async {

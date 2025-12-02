@@ -41,6 +41,8 @@ import 'features/tasks/domain/usecases/get_tasks_usecase.dart' as _i951;
 import 'features/tasks/domain/usecases/move_task_usecase.dart' as _i584;
 import 'features/tasks/domain/usecases/update_comment_usecase.dart' as _i137;
 import 'features/tasks/domain/usecases/update_task_usecase.dart' as _i878;
+import 'features/tasks/presentation/bloc/kanban_bloc.dart' as _i742;
+import 'features/tasks/presentation/cubit/comments_cubit.dart' as _i313;
 import 'features/timer/data/datasources/timer_local_datasource.dart' as _i93;
 import 'features/timer/data/repositories/timer_repository_impl.dart' as _i310;
 import 'features/timer/domain/repository/timer_repository.dart' as _i79;
@@ -55,6 +57,8 @@ import 'features/timer/domain/usecases/pause_timer_usecase.dart' as _i185;
 import 'features/timer/domain/usecases/resume_timer_usecase.dart' as _i970;
 import 'features/timer/domain/usecases/start_timer_usecase.dart' as _i647;
 import 'features/timer/domain/usecases/stop_timer_usecase.dart' as _i640;
+import 'features/timer/presentation/bloc/timer_bloc.dart' as _i486;
+import 'features/timer/presentation/cubit/task_history_cubit.dart' as _i331;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -115,11 +119,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i76.ConnectivityService>(),
       ),
     );
-    gh.lazySingleton<_i923.AddTask>(
-      () => _i923.AddTask(gh<_i81.TasksRepository>()),
+    gh.lazySingleton<_i923.AddTaskUseCase>(
+      () => _i923.AddTaskUseCase(gh<_i81.TasksRepository>()),
     );
-    gh.lazySingleton<_i460.CloseTask>(
-      () => _i460.CloseTask(gh<_i81.TasksRepository>()),
+    gh.lazySingleton<_i460.CloseTaskUseCase>(
+      () => _i460.CloseTaskUseCase(gh<_i81.TasksRepository>()),
     );
     gh.lazySingleton<_i555.GetProject>(
       () => _i555.GetProject(gh<_i81.TasksRepository>()),
@@ -136,20 +140,43 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i264.GetTask>(
       () => _i264.GetTask(gh<_i81.TasksRepository>()),
     );
-    gh.lazySingleton<_i951.GetTasks>(
-      () => _i951.GetTasks(gh<_i81.TasksRepository>()),
+    gh.lazySingleton<_i951.GetTasksUseCase>(
+      () => _i951.GetTasksUseCase(gh<_i81.TasksRepository>()),
     );
-    gh.lazySingleton<_i584.MoveTask>(
-      () => _i584.MoveTask(gh<_i81.TasksRepository>()),
+    gh.lazySingleton<_i584.MoveTaskUseCase>(
+      () => _i584.MoveTaskUseCase(gh<_i81.TasksRepository>()),
     );
-    gh.lazySingleton<_i878.UpdateTask>(
-      () => _i878.UpdateTask(gh<_i81.TasksRepository>()),
+    gh.lazySingleton<_i878.UpdateTaskUseCase>(
+      () => _i878.UpdateTaskUseCase(gh<_i81.TasksRepository>()),
+    );
+    gh.factory<_i331.TaskHistoryCubit>(
+      () =>
+          _i331.TaskHistoryCubit(gh<_i1062.GetCompletedTasksHistoryUseCase>()),
+    );
+    gh.factory<_i742.KanbanBloc>(
+      () => _i742.KanbanBloc(
+        gh<_i951.GetTasksUseCase>(),
+        gh<_i584.MoveTaskUseCase>(),
+        gh<_i923.AddTaskUseCase>(),
+        gh<_i878.UpdateTaskUseCase>(),
+        gh<_i460.CloseTaskUseCase>(),
+        gh<_i540.GetActiveTimerUseCase>(),
+      ),
     );
     gh.factory<_i861.CommentsRepository>(
       () => _i896.CommentsRepositoryImpl(
         gh<_i381.TodoistApi>(),
         gh<_i939.CommentsLocalDataSource>(),
         gh<_i76.ConnectivityService>(),
+      ),
+    );
+    gh.factory<_i486.TimerBloc>(
+      () => _i486.TimerBloc(
+        gh<_i647.StartTimerUseCase>(),
+        gh<_i185.PauseTimerUseCase>(),
+        gh<_i970.ResumeTimerUseCase>(),
+        gh<_i640.StopTimerUseCase>(),
+        gh<_i540.GetActiveTimerUseCase>(),
       ),
     );
     gh.lazySingleton<_i968.AddComment>(
@@ -163,6 +190,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i137.UpdateComment>(
       () => _i137.UpdateComment(gh<_i861.CommentsRepository>()),
+    );
+    gh.factory<_i313.CommentsCubit>(
+      () => _i313.CommentsCubit(
+        gh<_i160.GetTaskComments>(),
+        gh<_i968.AddComment>(),
+        gh<_i137.UpdateComment>(),
+        gh<_i146.DeleteComment>(),
+      ),
     );
     return this;
   }

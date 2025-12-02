@@ -5,7 +5,7 @@ import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/repository/tasks_repository.dart';
 import 'package:equatable/equatable.dart';
 
-/// Parameters for the [AddTask] use case.
+/// Parameters for the [AddTaskUseCase] use case.
 class AddTaskParams extends Equatable {
   /// The task to create.
   final Task task;
@@ -23,12 +23,12 @@ class AddTaskParams extends Equatable {
 /// information provided in the parameters. The created task is returned
 /// with its assigned ID.
 @lazySingleton
-class AddTask implements UseCase<Task, AddTaskParams> {
+class AddTaskUseCase implements UseCase<Task, AddTaskParams> {
   /// The repository to create the task in.
   final TasksRepository repository;
 
-  /// Creates an [AddTask] use case with the given [repository].
-  AddTask(this.repository);
+  /// Creates an [AddTaskUseCase] use case with the given [repository].
+  AddTaskUseCase(this.repository);
 
   @override
   Future<Result<Task>> call(AddTaskParams params) async {

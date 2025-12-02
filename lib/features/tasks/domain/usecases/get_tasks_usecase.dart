@@ -9,12 +9,12 @@ import 'package:time_tracking_kanaban/features/tasks/domain/repository/tasks_rep
 /// This use case fetches all tasks accessible to the current user
 /// from the repository.
 @lazySingleton
-class GetTasks implements UseCase<List<Task>, NoParams> {
+class GetTasksUseCase implements UseCase<List<Task>, NoParams> {
   /// The repository to fetch tasks from.
   final TasksRepository repository;
 
-  /// Creates a [GetTasks] use case with the given [repository].
-  GetTasks(this.repository);
+  /// Creates a [GetTasksUseCase] use case with the given [repository].
+  GetTasksUseCase(this.repository);
 
   @override
   Future<Result<List<Task>>> call(NoParams params) async {
