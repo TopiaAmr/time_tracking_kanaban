@@ -20,8 +20,9 @@ void main() {
     // arrange
     const tCommentId = 'comment-1';
 
-    when(mockRepository.deleteComment(tCommentId))
-        .thenAnswer((_) async => Success<void>(null as dynamic));
+    when(
+      mockRepository.deleteComment(tCommentId),
+    ).thenAnswer((_) async => Success<void>(null));
 
     // act
     final result = await usecase(const DeleteCommentParams(tCommentId));
@@ -32,4 +33,3 @@ void main() {
     verifyNoMoreInteractions(mockRepository);
   });
 }
-

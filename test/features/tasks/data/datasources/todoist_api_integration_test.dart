@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logger/logger.dart';
 import 'package:time_tracking_kanaban/features/tasks/data/datasources/todoist_api.dart';
 import 'package:time_tracking_kanaban/core/network/todoist_response_interceptor.dart';
 import 'package:time_tracking_kanaban/features/tasks/data/models/task_request_models.dart';
@@ -25,6 +26,7 @@ void main() {
   String? projectId;
   String? createdTaskId;
   bool useRealApi = false;
+  final Logger logger = Logger();
 
   setUpAll(() async {
     // Load environment variables
@@ -77,7 +79,7 @@ void main() {
         await api!.deleteTask(createdTaskId!);
       } catch (e) {
         // Ignore cleanup errors
-        print('Warning: Failed to cleanup task $createdTaskId: $e');
+        logger.w('Warning: Failed to cleanup task $createdTaskId: $e');
       }
     }
   });
@@ -106,14 +108,14 @@ void main() {
         final firstProject = projects.first;
         expect(firstProject.id, isNotEmpty);
         expect(firstProject.name, isNotEmpty);
-        print('✓ Found ${projects.length} projects');
-        print('  First project: ${firstProject.name} (${firstProject.id})');
+        logger.d('✓ Found ${projects.length} projects');
+        logger.d('  First project: ${firstProject.name} (${firstProject.id})');
       } on DioException catch (e) {
-        print('❌ Error getting projects:');
-        print('   Status: ${e.response?.statusCode}');
-        print('   Data: ${e.response?.data}');
-        print('   Headers: ${e.response?.headers}');
-        print(
+        logger.e('❌ Error getting projects:');
+        logger.e('   Status: ${e.response?.statusCode}');
+        logger.e('   Data: ${e.response?.data}');
+        logger.e('   Headers: ${e.response?.headers}');
+        logger.e(
           '   Request: ${e.requestOptions.method} ${e.requestOptions.path}',
         );
         rethrow;
@@ -137,7 +139,7 @@ void main() {
       // assert
       expect(project.id, testProjectId);
       expect(project.name, isNotEmpty);
-      print('✓ Retrieved project: ${project.name}');
+      logger.d('✓ Retrieved project: ${project.name}');
     });
 
     test('should get sections from the API', () async {
@@ -147,13 +149,13 @@ void main() {
 
       // assert
       expect(sections, isA<List>());
-      print('✓ Found ${sections.length} sections');
+      logger.d('✓ Found ${sections.length} sections');
 
       if (sections.isNotEmpty) {
         final firstSection = sections.first;
         expect(firstSection.id, isNotEmpty);
         expect(firstSection.name, isNotEmpty);
-        print('  First section: ${firstSection.name} (${firstSection.id})');
+        logger.d('  First section: ${firstSection.name} (${firstSection.id})');
       }
     });
 
@@ -162,7 +164,7 @@ void main() {
       // arrange
       if (projectId == null || projectId!.isEmpty) {
         // Skip if PROJECT_ID is not set
-        print('⚠ Skipping test: PROJECT_ID not set in .env');
+        logger.w('⚠ Skipping test: PROJECT_ID not set in .env');
         return;
       }
 
@@ -173,9 +175,9 @@ void main() {
       expect(sections, isA<List>());
       if (sections.isNotEmpty) {
         expect(sections.every((s) => s.projectId == projectId), true);
-        print('✓ Found ${sections.length} sections for project $projectId');
+        logger.d('✓ Found ${sections.length} sections for project $projectId');
       } else {
-        print('✓ No sections found for project $projectId (this is okay)');
+        logger.d('✓ No sections found for project $projectId (this is okay)');
       }
     });
 
@@ -186,13 +188,13 @@ void main() {
 
       // assert
       expect(tasks, isA<List>());
-      print('✓ Found ${tasks.length} tasks');
+      logger.d('✓ Found ${tasks.length} tasks');
 
       if (tasks.isNotEmpty) {
         final firstTask = tasks.first;
         expect(firstTask.id, isNotEmpty);
         expect(firstTask.content, isNotEmpty);
-        print('  First task: ${firstTask.content} (${firstTask.id})');
+        logger.d('  First task: ${firstTask.content} (${firstTask.id})');
       }
     });
 
@@ -201,7 +203,7 @@ void main() {
       // arrange
       if (projectId == null || projectId!.isEmpty) {
         // Skip if PROJECT_ID is not set
-        print('⚠ Skipping test: PROJECT_ID not set in .env');
+        logger.w('⚠ Skipping test: PROJECT_ID not set in .env');
         return;
       }
 
@@ -212,9 +214,9 @@ void main() {
       expect(tasks, isA<List>());
       if (tasks.isNotEmpty) {
         expect(tasks.every((t) => t.projectId == projectId), true);
-        print('✓ Found ${tasks.length} tasks for project $projectId');
+        logger.d('✓ Found ${tasks.length} tasks for project $projectId');
       } else {
-        print('✓ No tasks found for project $projectId (this is okay)');
+        logger.d('✓ No tasks found for project $projectId (this is okay)');
       }
     });
 
@@ -242,7 +244,7 @@ void main() {
         }
 
         createdTaskId = createdTask.id;
-        print('✓ Created task: ${createdTask.content} (${createdTask.id})');
+        logger.d('✓ Created task: ${createdTask.content} (${createdTask.id})');
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -270,7 +272,7 @@ void main() {
         expect(task.id, createdTaskId);
         expect(task.content, isNotEmpty);
         expect(task.projectId, isNotEmpty);
-        print('✓ Retrieved task: ${task.content} (${task.id})');
+        logger.d('✓ Retrieved task: ${task.content} (${task.id})');
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -303,7 +305,7 @@ void main() {
       expect(updatedTask.id, createdTaskId);
       expect(updatedTask.content, updateBody.content);
       expect(updatedTask.description, updateBody.description);
-      print('✓ Updated task: ${updatedTask.content}');
+      logger.d('✓ Updated task: ${updatedTask.content}');
     }, timeout: const Timeout(Duration(seconds: 30)));
 
     test(
@@ -332,7 +334,7 @@ void main() {
           true,
           reason: 'Task should be marked as completed',
         );
-        print('✓ Closed task: ${task.content}');
+        logger.d('✓ Closed task: ${task.content}');
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );
@@ -343,7 +345,7 @@ void main() {
         if (shouldSkipTest()) return;
         // arrange
         if (projectId == null || projectId!.isEmpty) {
-          print('⚠ Skipping test: PROJECT_ID not set in .env');
+          logger.w('⚠ Skipping test: PROJECT_ID not set in .env');
           return;
         }
 
@@ -374,7 +376,7 @@ void main() {
         if (targetSectionId != null) {
           expect(movedTask.sectionId, targetSectionId);
         }
-        print(
+        logger.d(
           '✓ Moved task to project $projectId${targetSectionId != null ? ' and section $targetSectionId' : ''}',
         );
 
@@ -407,7 +409,7 @@ void main() {
         final task = await api!.getTask(taskIdToDelete);
         // If task is retrieved, check if it's marked as deleted
         if (task.isDeleted) {
-          print('✓ Task marked as deleted: $taskIdToDelete');
+          logger.d('✓ Task marked as deleted: $taskIdToDelete');
         } else {
           // Try one more time after a delay
           await Future.delayed(const Duration(seconds: 2));
@@ -416,7 +418,7 @@ void main() {
             fail('Task should have been deleted');
           } on DioException catch (e) {
             if (e.response?.statusCode == 404) {
-              print('✓ Deleted task: $taskIdToDelete');
+              logger.d('✓ Deleted task: $taskIdToDelete');
             } else {
               rethrow;
             }
@@ -424,7 +426,7 @@ void main() {
         }
       } on DioException catch (e) {
         if (e.response?.statusCode == 404) {
-          print('✓ Deleted task: $taskIdToDelete');
+          logger.d('✓ Deleted task: $taskIdToDelete');
         } else {
           rethrow;
         }

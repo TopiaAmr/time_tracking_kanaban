@@ -132,5 +132,5 @@ void setupMockDummyValues() {
   provideDummy<Result<List<Comment>>>(const Success(<Comment>[]));
 
   // For Result<void>, we use null cast to dynamic since void can't have a value
-  provideDummy<Result<void>>(Success<void>(null as dynamic));
+  provideDummy<Result<void>>(const Success<void>(null));
 }
