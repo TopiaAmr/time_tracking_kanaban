@@ -143,11 +143,13 @@ class TestDataFactory {
   /// Creates a test TaskTimerSummary with default or custom values.
   static TaskTimerSummary createTaskTimerSummary({
     String? taskId,
+    String? taskTitle,
     int? totalTrackedSeconds,
     bool? hasActiveTimer,
   }) {
     return TaskTimerSummary(
       taskId: taskId ?? 'task1',
+      taskTitle: taskTitle ?? 'Test Task',
       totalTrackedSeconds: totalTrackedSeconds ?? 3600,
       hasActiveTimer: hasActiveTimer ?? false,
     );

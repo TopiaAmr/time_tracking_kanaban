@@ -38,11 +38,13 @@ void main() {
         final summaries = [
           const TaskTimerSummary(
             taskId: 'task1',
+        taskTitle: 'Test Task 1',
             totalTrackedSeconds: 3600,
             hasActiveTimer: false,
           ),
           const TaskTimerSummary(
             taskId: 'task2',
+        taskTitle: 'Test Task 2',
             totalTrackedSeconds: 1800,
             hasActiveTimer: false,
           ),
@@ -58,11 +60,13 @@ void main() {
         TaskHistoryLoaded([
           const TaskTimerSummary(
             taskId: 'task1',
+        taskTitle: 'Test Task 1',
             totalTrackedSeconds: 3600,
             hasActiveTimer: false,
           ),
           const TaskTimerSummary(
             taskId: 'task2',
+        taskTitle: 'Test Task 2',
             totalTrackedSeconds: 1800,
             hasActiveTimer: false,
           ),

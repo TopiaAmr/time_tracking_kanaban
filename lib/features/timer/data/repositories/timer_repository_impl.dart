@@ -1,6 +1,8 @@
 import 'package:injectable/injectable.dart';
 import 'package:time_tracking_kanaban/core/errors/failure.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
+import 'package:time_tracking_kanaban/features/tasks/data/datasources/tasks_local_datasource.dart';
+import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 import 'package:time_tracking_kanaban/features/timer/data/datasources/timer_local_datasource.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart';
@@ -13,8 +15,9 @@ import 'package:time_tracking_kanaban/features/timer/domain/repository/timer_rep
 @Injectable(as: TimerRepository)
 class TimerRepositoryImpl implements TimerRepository {
   final TimerLocalDataSource localDataSource;
+  final TasksLocalDataSource tasksLocalDataSource;
 
-  TimerRepositoryImpl(this.localDataSource);
+  TimerRepositoryImpl(this.localDataSource, this.tasksLocalDataSource);
 
   @override
   Future<Result<TimeLog>> startTimer(String taskId) async {
@@ -186,8 +189,16 @@ class TimerRepositoryImpl implements TimerRepository {
         }
       }
 
+      // Get task title from local cache
+      String taskTitle = 'Task $taskId';
+      final taskResult = await tasksLocalDataSource.getCachedTask(taskId);
+      if (taskResult is Success<Task>) {
+        taskTitle = taskResult.value.content;
+      }
+
       return Success(TaskTimerSummary(
         taskId: taskId,
+        taskTitle: taskTitle,
         totalTrackedSeconds: totalSeconds,
         hasActiveTimer: hasActiveTimer,
       ));
@@ -225,8 +236,16 @@ class TimerRepositoryImpl implements TimerRepository {
           }
         }
 
+        // Get task title from local cache
+        String taskTitle = 'Task ${entry.key}';
+        final taskResult = await tasksLocalDataSource.getCachedTask(entry.key);
+        if (taskResult is Success<Task>) {
+          taskTitle = taskResult.value.content;
+        }
+
         summaries.add(TaskTimerSummary(
           taskId: entry.key,
+          taskTitle: taskTitle,
           totalTrackedSeconds: totalSeconds,
           hasActiveTimer: false,
         ));

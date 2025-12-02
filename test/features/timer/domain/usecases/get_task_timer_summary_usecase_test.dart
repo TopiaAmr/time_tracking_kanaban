@@ -22,6 +22,7 @@ void main() {
     const tTaskId = 'task-1';
     const tSummary = TaskTimerSummary(
       taskId: tTaskId,
+      taskTitle: 'Test Task',
       totalTrackedSeconds: 7200, // 2 hours
       hasActiveTimer: false,
     );

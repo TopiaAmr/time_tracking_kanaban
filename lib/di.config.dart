@@ -99,7 +99,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i93.TimerLocalDataSource(gh<_i111.AppDatabase>()),
     );
     gh.factory<_i79.TimerRepository>(
-      () => _i310.TimerRepositoryImpl(gh<_i93.TimerLocalDataSource>()),
+      () => _i310.TimerRepositoryImpl(
+        gh<_i93.TimerLocalDataSource>(),
+        gh<_i884.TasksLocalDataSource>(),
+      ),
     );
     gh.lazySingleton<_i76.ConnectivityService>(
       () => _i76.ConnectivityService(gh<_i895.Connectivity>()),

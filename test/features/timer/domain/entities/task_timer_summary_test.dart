@@ -10,6 +10,7 @@ void main() {
       // arrange & act
       const summary = TaskTimerSummary(
         taskId: tTaskId,
+        taskTitle: 'Test Task',
         totalTrackedSeconds: tTotalSeconds,
         hasActiveTimer: false,
       );
@@ -24,6 +25,7 @@ void main() {
       // arrange
       const summary = TaskTimerSummary(
         taskId: tTaskId,
+        taskTitle: 'Test Task',
         totalTrackedSeconds: tTotalSeconds,
         hasActiveTimer: false,
       );
@@ -40,11 +42,13 @@ void main() {
       // arrange
       const summary1 = TaskTimerSummary(
         taskId: tTaskId,
+        taskTitle: 'Test Task',
         totalTrackedSeconds: tTotalSeconds,
         hasActiveTimer: false,
       );
       const summary2 = TaskTimerSummary(
         taskId: tTaskId,
+        taskTitle: 'Test Task',
         totalTrackedSeconds: tTotalSeconds,
         hasActiveTimer: false,
       );
@@ -57,11 +61,13 @@ void main() {
       // arrange
       const summary1 = TaskTimerSummary(
         taskId: tTaskId,
+        taskTitle: 'Test Task',
         totalTrackedSeconds: tTotalSeconds,
         hasActiveTimer: false,
       );
       const summary2 = TaskTimerSummary(
         taskId: tTaskId,
+        taskTitle: 'Test Task',
         totalTrackedSeconds: tTotalSeconds,
         hasActiveTimer: true,
       );

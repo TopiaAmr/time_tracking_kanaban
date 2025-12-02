@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:time_tracking_kanaban/core/database/app_database.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
+import 'package:time_tracking_kanaban/features/tasks/data/datasources/tasks_local_datasource.dart';
 import 'package:time_tracking_kanaban/features/timer/data/datasources/timer_local_datasource.dart';
 import 'package:time_tracking_kanaban/features/timer/data/repositories/timer_repository_impl.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
@@ -18,7 +19,8 @@ void main() {
     setupMockDummyValues();
     database = AppDatabase(LazyDatabase(() async => NativeDatabase.memory()));
     localDataSource = TimerLocalDataSource(database);
-    repository = TimerRepositoryImpl(localDataSource);
+    final tasksLocalDataSource = TasksLocalDataSource(database);
+    repository = TimerRepositoryImpl(localDataSource, tasksLocalDataSource);
   });
 
   tearDown(() async {

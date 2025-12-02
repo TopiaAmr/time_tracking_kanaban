@@ -64,20 +64,20 @@ class Sidebar extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
-                _NavItem(
-                  icon: Icons.dashboard_outlined,
-                  activeIcon: Icons.dashboard,
-                  label: context.l10n.navOverview,
-                  route: RouteNames.overview,
-                  currentPath: currentPath,
-                ),
-                _NavItem(
-                  icon: Icons.folder_outlined,
-                  activeIcon: Icons.folder,
-                  label: context.l10n.navProjects,
-                  route: RouteNames.projects,
-                  currentPath: currentPath,
-                ),
+                // _NavItem(
+                //   icon: Icons.dashboard_outlined,
+                //   activeIcon: Icons.dashboard,
+                //   label: context.l10n.navOverview,
+                //   route: RouteNames.overview,
+                //   currentPath: currentPath,
+                // ),
+                // _NavItem(
+                //   icon: Icons.folder_outlined,
+                //   activeIcon: Icons.folder,
+                //   label: context.l10n.navProjects,
+                //   route: RouteNames.projects,
+                //   currentPath: currentPath,
+                // ),
                 _NavItem(
                   icon: Icons.checklist_outlined,
                   activeIcon: Icons.checklist,

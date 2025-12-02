@@ -103,6 +103,7 @@ void setupMockDummyValues() {
     Success(
       const TaskTimerSummary(
         taskId: '',
+        taskTitle: 'Test Task',
         totalTrackedSeconds: 0,
         hasActiveTimer: false,
       ),

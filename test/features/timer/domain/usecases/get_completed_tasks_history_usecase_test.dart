@@ -23,11 +23,13 @@ void main() {
     final tHistory = [
       const TaskTimerSummary(
         taskId: 'task-1',
+        taskTitle: 'Test Task 1',
         totalTrackedSeconds: 3600, // 1 hour
         hasActiveTimer: false,
       ),
       const TaskTimerSummary(
         taskId: 'task-2',
+        taskTitle: 'Test Task 2',
         totalTrackedSeconds: 7200, // 2 hours
         hasActiveTimer: false,
       ),

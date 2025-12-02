@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:time_tracking_kanaban/core/l10n/l10n.dart';
-import 'package:time_tracking_kanaban/core/utils/result.dart';
-import 'package:time_tracking_kanaban/core/widgets/app_scaffold.dart';
 import 'package:time_tracking_kanaban/core/widgets/app_header.dart';
+import 'package:time_tracking_kanaban/core/widgets/app_scaffold.dart';
 import 'package:time_tracking_kanaban/core/widgets/task_history_skeleton.dart';
 import 'package:time_tracking_kanaban/di.dart';
-import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/cubit/task_history_cubit.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/cubit/task_history_state.dart';
@@ -28,6 +25,7 @@ class TaskHistoryScreen extends StatelessWidget {
     }
     return '${minutes}m';
   }
+
 
 
   @override
@@ -175,11 +173,13 @@ class TaskHistoryScreen extends StatelessWidget {
                       }
 
                       final summary = state.summaries[index - 1];
+                      
                       return _TaskHistoryItem(
                         summary: summary,
                         isWide: isWide,
                         theme: theme,
                         formatDuration: _formatDuration,
+                        taskTitle: summary.taskTitle,
                       );
                     },
                   );
@@ -205,49 +205,24 @@ class TaskHistoryScreen extends StatelessWidget {
   }
 }
 
-class _TaskHistoryItem extends StatefulWidget {
+class _TaskHistoryItem extends StatelessWidget {
   final TaskTimerSummary summary;
   final bool isWide;
   final ThemeData theme;
   final String Function(int seconds) formatDuration;
+  final String taskTitle;
 
   const _TaskHistoryItem({
     required this.summary,
     required this.isWide,
     required this.theme,
     required this.formatDuration,
+    required this.taskTitle,
   });
 
   @override
-  State<_TaskHistoryItem> createState() => _TaskHistoryItemState();
-}
-
-class _TaskHistoryItemState extends State<_TaskHistoryItem> {
-  late final Future<Result<Task>> _taskFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    final getTaskUseCase = getIt<GetTask>();
-    _taskFuture = getTaskUseCase(GetTaskParams(widget.summary.taskId));
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Result<Task>>(
-      future: _taskFuture,
-      builder: (context, snapshot) {
-        String title = 'Task ${widget.summary.taskId}';
-
-        if (snapshot.hasData && snapshot.data is Success<Task>) {
-          final task = (snapshot.data as Success<Task>).value;
-          title = task.content;
-        }
-
-        final theme = widget.theme;
-        final summary = widget.summary;
-
-        if (widget.isWide) {
+    if (isWide) {
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: Padding(
@@ -281,7 +256,7 @@ class _TaskHistoryItemState extends State<_TaskHistoryItem> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
+                          taskTitle,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
@@ -290,7 +265,7 @@ class _TaskHistoryItemState extends State<_TaskHistoryItem> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          widget.formatDuration(summary.totalTrackedSeconds),
+                          formatDuration(summary.totalTrackedSeconds),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.primary,
                           ),
@@ -335,13 +310,13 @@ class _TaskHistoryItemState extends State<_TaskHistoryItem> {
                   : theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             title: Text(
-              title,
+              taskTitle,
               style: theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),
             subtitle: Text(
-              widget.formatDuration(summary.totalTrackedSeconds),
+              formatDuration(summary.totalTrackedSeconds),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.primary,
               ),
@@ -369,8 +344,6 @@ class _TaskHistoryItemState extends State<_TaskHistoryItem> {
                   ),
           ),
         );
-      },
-    );
   }
 }
 
