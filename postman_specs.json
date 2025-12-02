@@ -1,0 +1,1175 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Todoist",
+      "version": "1.0.0",
+      "description": ""
+    },
+    "servers": [
+      {
+        "url": "https://api.todoist.com"
+      }
+    ],
+    "paths": {
+      "/api/v1/projects": {
+        "get": {
+          "summary": "Get Projects",
+          "tags": [],
+          "responses": {
+            "200": {
+              "description": "New Request",
+              "headers": {
+                "Transfer-Encoding": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Content-Encoding": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ]
+        }
+      },
+      "/api/v1/projects/6fQ75Q9JppwcVh57": {
+        "get": {
+          "summary": "Get Project",
+          "tags": [],
+          "responses": {
+            "200": {
+              "description": "Get Project",
+              "headers": {
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ]
+        }
+      },
+      "/api/v1/sections": {
+        "get": {
+          "summary": "Get Sections",
+          "tags": [],
+          "parameters": [
+            {
+              "name": "project_id",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "default": "<string>"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Get Sections",
+              "headers": {
+                "Transfer-Encoding": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Content-Encoding": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ]
+        }
+      },
+      "/api/v1/sections/6fQ75RggGPMqmv37": {
+        "get": {
+          "summary": "Get Section",
+          "tags": [],
+          "responses": {
+            "200": {
+              "description": "Get Section",
+              "headers": {
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ]
+        }
+      },
+      "/api/v1/tasks": {
+        "get": {
+          "summary": "Get Tasks",
+          "tags": [],
+          "parameters": [
+            {
+              "name": "project_id",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "default": "<string>"
+              }
+            },
+            {
+              "name": "section_id",
+              "in": "query",
+              "schema": {
+                "type": "string",
+                "default": "<string>"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Get Tasks",
+              "headers": {
+                "Transfer-Encoding": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Content-Encoding": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ]
+        },
+        "post": {
+          "summary": "Add Task",
+          "tags": [],
+          "responses": {
+            "200": {
+              "description": "Add Task",
+              "headers": {
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Error",
+              "headers": {
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Retry-After": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "type": "string"
+                    },
+                    "section_id": {
+                      "type": "string"
+                    },
+                    "labels": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "priority": {
+                      "type": "integer"
+                    },
+                    "due_date": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "due_lang": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/tasks/6fQ7g64vM5fv3RMf/move": {
+        "post": {
+          "summary": "Move Task",
+          "tags": [],
+          "responses": {
+            "200": {
+              "description": "Move Task",
+              "headers": {
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "error",
+              "headers": {
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Retry-After": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "project_id": {
+                      "type": "string"
+                    },
+                    "section_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/tasks/6fQ7g64vM5fv3RMf": {
+        "post": {
+          "summary": "Update Task",
+          "tags": [],
+          "responses": {
+            "200": {
+              "description": "Update Task",
+              "headers": {
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Error Update Task",
+              "headers": {
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Retry-After": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "due_date": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete Task",
+          "tags": [],
+          "responses": {},
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/tasks/6fQ7h4Rm63qP6qX7/close": {
+        "post": {
+          "summary": "Close Task",
+          "tags": [],
+          "responses": {
+            "204": {
+              "description": "Close Task",
+              "headers": {
+                "Connection": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Referrer-Policy": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Server": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Strict-Transport-Security": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Cache": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Via": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Pop": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "Alt-Svc": {
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "X-Amz-Cf-Id": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "BearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "BearerAuth": {
+          "type": "http",
+          "scheme": "bearer"
+        }
+      }
+    }
+  }
