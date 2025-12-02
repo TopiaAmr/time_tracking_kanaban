@@ -147,6 +147,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     return total;
   }
 
+  Future<void> _onTimerChanged() async {
+    await _loadTimeLogs();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -207,6 +211,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             task: _task!,
             totalSeconds: _calculateTotalSeconds(),
             formatDuration: _formatDuration,
+            onTimerChanged: _onTimerChanged,
           ),
           const SizedBox(height: 24),
           TaskMetadataSection(
@@ -218,6 +223,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             timeLogs: _timeLogs,
             isLoading: _isLoadingTimeLogs,
             formatDuration: _formatDuration,
+            taskTitle: _task!.content,
+            taskDescription: _task!.description,
           ),
           const SizedBox(height: 24),
           TaskDescriptionSection(task: _task!),
@@ -280,6 +287,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     task: _task!,
                     totalSeconds: _calculateTotalSeconds(),
                     formatDuration: _formatDuration,
+                    onTimerChanged: _onTimerChanged,
                   ),
                   const SizedBox(height: 24),
                   TaskMetadataSection(
@@ -295,6 +303,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     timeLogs: _timeLogs,
                     isLoading: _isLoadingTimeLogs,
                     formatDuration: _formatDuration,
+                    taskTitle: _task!.content,
+                    taskDescription: _task!.description,
                   ),
                 ],
               ),

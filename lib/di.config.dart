@@ -168,7 +168,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i878.UpdateTaskUseCase>(
       () => _i878.UpdateTaskUseCase(gh<_i81.TasksRepository>()),
     );
-    gh.factory<_i331.TaskHistoryCubit>(
+    gh.lazySingleton<_i331.TaskHistoryCubit>(
       () =>
           _i331.TaskHistoryCubit(gh<_i1062.GetCompletedTasksHistoryUseCase>()),
     );
@@ -179,7 +179,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i76.ConnectivityService>(),
       ),
     );
-    gh.factory<_i742.KanbanBloc>(
+    gh.lazySingleton<_i742.KanbanBloc>(
       () => _i742.KanbanBloc(
         gh<_i951.GetTasksUseCase>(),
         gh<_i584.MoveTaskUseCase>(),
@@ -190,7 +190,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i362.GetSections>(),
       ),
     );
-    gh.factory<_i486.TimerBloc>(
+    gh.lazySingleton<_i486.TimerBloc>(
       () => _i486.TimerBloc(
         gh<_i647.StartTimerUseCase>(),
         gh<_i185.PauseTimerUseCase>(),

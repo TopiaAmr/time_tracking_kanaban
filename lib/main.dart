@@ -49,8 +49,8 @@ class MyApp extends StatelessWidget {
           create: (context) => getIt<L10nCubit>(),
         ),
         // Timer management - global for timer widget and task detail
-        BlocProvider(
-          create: (context) => getIt<TimerBloc>()..add(const LoadActiveTimer()),
+        BlocProvider.value(
+          value: getIt<TimerBloc>()..add(const LoadActiveTimer()),
         ),
       ],
       child: BlocBuilder<L10nCubit, L10nState>(

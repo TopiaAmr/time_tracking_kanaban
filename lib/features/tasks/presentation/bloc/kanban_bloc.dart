@@ -20,7 +20,7 @@ import 'kanban_state.dart';
 /// This BLoC handles loading tasks, grouping them into columns (To Do,
 /// In Progress, Done), and managing task operations like creating,
 /// updating, moving, and closing tasks.
-@injectable
+@lazySingleton
 class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
   /// Use case for getting all tasks.
   final GetTasksUseCase _getTasks;
@@ -66,13 +66,19 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     LoadKanbanTasks event,
     Emitter<KanbanState> emit,
   ) async {
-    emit(const KanbanLoading());
+    // Only show loading if we don't already have loaded data
+    if (state is! KanbanLoaded) {
+      emit(const KanbanLoading());
+    }
 
     final tasksResult = await _getTasks(NoParams());
     final sectionsResult = await _getSections(NoParams());
 
     if (tasksResult is Error<List<Task>>) {
-      emit(KanbanError(tasksResult.failure));
+      // Only emit error if we don't have existing data to show
+      if (state is! KanbanLoaded) {
+        emit(KanbanError(tasksResult.failure));
+      }
       return;
     }
 

@@ -6,12 +6,14 @@ class TaskTimerSection extends StatelessWidget {
   final Task task;
   final int totalSeconds;
   final String Function(int seconds) formatDuration;
+  final VoidCallback? onTimerChanged;
 
   const TaskTimerSection({
     super.key,
     required this.task,
     required this.totalSeconds,
     required this.formatDuration,
+    this.onTimerChanged,
   });
 
   @override
@@ -93,7 +95,10 @@ class TaskTimerSection extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             // Timer controls
-            TimerWidget(taskId: task.id),
+            TimerWidget(
+              taskId: task.id,
+              onTimerChanged: onTimerChanged,
+            ),
           ],
         ),
       ),

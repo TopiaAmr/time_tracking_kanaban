@@ -16,7 +16,7 @@ import 'timer_state.dart';
 ///
 /// This BLoC handles starting, pausing, resuming, and stopping timers.
 /// It uses a Ticker to provide real-time updates of elapsed time every second.
-@injectable
+@lazySingleton
 class TimerBloc extends Bloc<TimerEvent, TimerState> {
   /// Use case for starting a timer.
   final StartTimerUseCase _startTimerUseCase;

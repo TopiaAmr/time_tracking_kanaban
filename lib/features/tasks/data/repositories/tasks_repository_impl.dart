@@ -37,6 +37,18 @@ class TasksRepositoryImpl implements TasksRepository {
     String? projectId,
     String? sectionId,
   }) async {
+    // Check cache first
+    final cachedResult = await localDataSource.getCachedTasks(
+      projectId: projectId,
+      sectionId: sectionId,
+    );
+    
+    // If we have cached data, return it immediately
+    if (cachedResult is Success<List<Task>> && cachedResult.value.isNotEmpty) {
+      return cachedResult;
+    }
+
+    // No cache or empty - fetch from API
     final isConnected = await connectivityService.isConnected();
 
     if (isConnected) {
@@ -58,10 +70,6 @@ class TasksRepositoryImpl implements TasksRepository {
         );
       } on DioException catch (e) {
         // If API fails, try to return cached data
-        final cachedResult = await localDataSource.getCachedTasks(
-          projectId: projectId,
-          sectionId: sectionId,
-        );
         if (cachedResult is Success) {
           return cachedResult;
         }
@@ -70,10 +78,6 @@ class TasksRepositoryImpl implements TasksRepository {
         );
       } catch (e) {
         // If API fails, try to return cached data
-        final cachedResult = await localDataSource.getCachedTasks(
-          projectId: projectId,
-          sectionId: sectionId,
-        );
         if (cachedResult is Success) {
           return cachedResult;
         }
@@ -81,15 +85,18 @@ class TasksRepositoryImpl implements TasksRepository {
       }
     } else {
       // Offline: return cached data
-      return await localDataSource.getCachedTasks(
-        projectId: projectId,
-        sectionId: sectionId,
-      );
+      return cachedResult;
     }
   }
 
   @override
   Future<Result<Task>> getTask(String id) async {
+    // Prefer local cache first to avoid unnecessary API calls
+    final cachedResult = await localDataSource.getCachedTask(id);
+    if (cachedResult is Success<Task>) {
+      return cachedResult;
+    }
+
     final isConnected = await connectivityService.isConnected();
 
     if (isConnected) {
@@ -101,23 +108,23 @@ class TasksRepositoryImpl implements TasksRepository {
         // Return cached data
         return await localDataSource.getCachedTask(id);
       } on DioException catch (e) {
-        // If API fails, try cached data
-        final cachedResult = await localDataSource.getCachedTask(id);
-        if (cachedResult is Success) {
-          return cachedResult;
+        // If API fails, try cached data again
+        final fallbackCached = await localDataSource.getCachedTask(id);
+        if (fallbackCached is Success<Task>) {
+          return fallbackCached;
         }
         return Error<Task>(ServerFailure([e.message, e.response?.statusCode]));
       } catch (e) {
-        // If API fails, try cached data
-        final cachedResult = await localDataSource.getCachedTask(id);
-        if (cachedResult is Success) {
-          return cachedResult;
+        // If API fails, try cached data again
+        final fallbackCached = await localDataSource.getCachedTask(id);
+        if (fallbackCached is Success<Task>) {
+          return fallbackCached;
         }
         return Error<Task>(NetworkFailure([e.toString()]));
       }
     } else {
-      // Offline: return cached data
-      return await localDataSource.getCachedTask(id);
+      // Offline: return cached data (already attempted above)
+      return cachedResult;
     }
   }
 

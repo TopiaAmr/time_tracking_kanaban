@@ -68,8 +68,8 @@ class AppRouter {
           pageBuilder: (context, state) => _buildSlideTransition(
             context: context,
             state: state,
-            child: BlocProvider(
-              create: (context) => getIt<KanbanBloc>(),
+            child: BlocProvider.value(
+              value: getIt<KanbanBloc>(),
               child: const KanbanBoardScreen(),
             ),
           ),

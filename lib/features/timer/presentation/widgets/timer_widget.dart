@@ -13,8 +13,9 @@ import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_sta
 class TimerWidget extends StatelessWidget {
   /// The task ID this timer is for.
   final String taskId;
+  final VoidCallback? onTimerChanged;
 
-  const TimerWidget({super.key, required this.taskId});
+  const TimerWidget({super.key, required this.taskId, this.onTimerChanged});
 
   /// Format seconds into HH:MM:SS format.
   String _formatDuration(int seconds) {
@@ -77,6 +78,7 @@ class TimerWidget extends StatelessWidget {
                               context.read<TimerBloc>().add(
                                 ResumeTimer(taskId),
                               );
+                              onTimerChanged?.call();
                             },
                             tooltip: context.l10n.timerResume,
                           ),
@@ -88,6 +90,7 @@ class TimerWidget extends StatelessWidget {
                               context.read<TimerBloc>().add(
                                 const PauseTimer(),
                               );
+                              onTimerChanged?.call();
                             },
                             tooltip: context.l10n.timerPause,
                           ),
@@ -96,6 +99,7 @@ class TimerWidget extends StatelessWidget {
                           onPressed: () {
                             HapticService.heavyImpact();
                             context.read<TimerBloc>().add(const StopTimer());
+                            onTimerChanged?.call();
                           },
                           tooltip: context.l10n.timerStop,
                         ),
@@ -129,6 +133,7 @@ class TimerWidget extends StatelessWidget {
                 onPressed: () {
                   HapticService.heavyImpact();
                   context.read<TimerBloc>().add(StartTimer(taskId));
+                  onTimerChanged?.call();
                 },
                 icon: const Icon(Icons.play_arrow),
                 label: Text(context.l10n.timerStart),

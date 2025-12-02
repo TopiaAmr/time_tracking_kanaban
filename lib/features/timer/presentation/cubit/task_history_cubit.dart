@@ -10,7 +10,7 @@ import 'task_history_state.dart';
 ///
 /// This cubit handles loading and displaying the history of completed
 /// tasks with their tracked time summaries.
-@injectable
+@lazySingleton
 class TaskHistoryCubit extends Cubit<TaskHistoryState> {
   /// Use case for getting completed tasks history.
   final GetCompletedTasksHistoryUseCase _getCompletedTasksHistoryUseCase;
@@ -21,12 +21,18 @@ class TaskHistoryCubit extends Cubit<TaskHistoryState> {
 
   /// Loads the history of completed tasks.
   Future<void> loadHistory() async {
-    emit(const TaskHistoryLoading());
+    // Only show loading if we don't already have loaded data
+    if (state is! TaskHistoryLoaded) {
+      emit(const TaskHistoryLoading());
+    }
 
     final result = await _getCompletedTasksHistoryUseCase(NoParams());
 
     if (result is Error<List<TaskTimerSummary>>) {
-      emit(TaskHistoryError(result.failure));
+      // Only emit error if we don't have existing data to show
+      if (state is! TaskHistoryLoaded) {
+        emit(TaskHistoryError(result.failure));
+      }
       return;
     }
 
