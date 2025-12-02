@@ -60,4 +60,10 @@ abstract class TasksRepository {
 
   /// Retrieves a single section by its [id].
   Future<Result<Section>> getSection(String id);
+
+  /// Syncs pending changes (tasks created/updated/deleted offline) with the API.
+  ///
+  /// This method should be called when connectivity is restored to sync
+  /// any local changes that were made while offline.
+  Future<Result<void>> syncPendingChanges();
 }

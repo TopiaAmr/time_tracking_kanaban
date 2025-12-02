@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/comment_model.dart';
 import '../models/project_model.dart';
 import '../models/section_model.dart';
 import '../models/task_model.dart';
@@ -115,4 +116,41 @@ abstract class TodoistApi {
   /// This marks the task as completed in Todoist.
   @POST('/api/v1/tasks/{id}/close')
   Future<void> closeTask(@Path('id') String id);
+
+  // Comments
+
+  /// Retrieves comments for a task from the Todoist API.
+  ///
+  /// Returns a paginated response with comments for the specified [taskId].
+  @GET('/api/v1/comments')
+  Future<CommentsResponse> getComments({
+    @Query('task_id') required String taskId,
+  });
+
+  /// Creates a new comment in Todoist.
+  ///
+  /// The [body] contains the comment details (content, project_id, task_id).
+  ///
+  /// Returns the created [CommentModel] instance.
+  @POST('/api/v1/comments')
+  Future<CommentModel> addComment(@Body() CreateCommentBody body);
+
+  /// Updates an existing comment.
+  ///
+  /// The [id] is the comment ID to update.
+  /// The [body] contains the updated content.
+  ///
+  /// Returns the updated [CommentModel] instance.
+  @POST('/api/v1/comments/{id}')
+  Future<CommentModel> updateComment(
+    @Path('id') String id,
+    @Body() UpdateCommentBody body,
+  );
+
+  /// Deletes a comment by its [id].
+  ///
+  /// This operation is permanent and cannot be undone.
+  /// Returns 204 on success.
+  @DELETE('/api/v1/comments/{id}')
+  Future<void> deleteComment(@Path('id') String id);
 }

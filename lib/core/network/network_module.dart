@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
@@ -53,5 +54,11 @@ abstract class NetworkModule {
   /// Returns a lazy singleton instance that is created on first access.
   @lazySingleton
   TodoistApi get todoistApi => TodoistApi(dio);
+
+  /// Provides a [Connectivity] instance for checking network connectivity.
+  ///
+  /// Returns a lazy singleton instance that is created on first access.
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
 }
 

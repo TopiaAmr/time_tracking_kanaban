@@ -44,12 +44,13 @@ dependencies:
   drift: ^2.29.0
   drift_flutter: ^0.2.7
   path_provider: ^2.1.5
-  connectivity: ^3.0.6
+  path: ^1.9.0
   shared_preferences: ^2.5.3
   bloc_test: ^10.0.0
   retrofit: ^4.9.1
   logger: ^2.6.2
   flutter_dotenv: ^5.1.0
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:

@@ -66,8 +66,17 @@ class TodoistResponseInterceptor extends Interceptor {
           }
         }
 
-        // Extract the results array
-        response.data = data['results'];
+        // Don't extract results for comments endpoint - it returns CommentsResponse wrapper
+        // which needs both 'results' and 'next_cursor' fields
+        final path = response.requestOptions.path;
+        if (path.contains('/api/v1/comments') && 
+            !path.contains('/api/v1/comments/')) {
+          // This is the getComments endpoint - keep the full response
+          _logger.d('Keeping full CommentsResponse for comments endpoint');
+        } else {
+          // Extract the results array for other paginated endpoints
+          response.data = data['results'];
+        }
       } else {
         // Single item response - log its structure
         _logger.d('Single item response');

@@ -27,5 +27,11 @@ abstract class CommentsRepository {
   ///
   /// If offline, the update should be stored locally and synced later.
   Future<Result<Comment>> updateComment(String commentId, String content);
+
+  /// Syncs pending changes (comments created/updated/deleted offline) with the API.
+  ///
+  /// This method should be called when connectivity is restored to sync
+  /// any local changes that were made while offline.
+  Future<Result<void>> syncPendingChanges();
 }
 

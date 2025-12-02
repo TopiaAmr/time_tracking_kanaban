@@ -195,4 +195,17 @@ class MockTasksRepository extends _i1.Mock implements _i2.TasksRepository {
             ),
           )
           as _i3.Future<_i4.Result<_i8.Section>>);
+
+  @override
+  _i3.Future<_i4.Result<void>> syncPendingChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#syncPendingChanges, []),
+            returnValue: _i3.Future<_i4.Result<void>>.value(
+              _i6.dummyValue<_i4.Result<void>>(
+                this,
+                Invocation.method(#syncPendingChanges, []),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Result<void>>);
 }
