@@ -31,6 +31,16 @@ jobs:
           echo "USE_REAL_API=${{ secrets.USE_REAL_API }}" >> .env
           echo "PROJECT_ID=${{ secrets.PROJECT_ID }}" >> .env
 
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
       - name: Install dependencies
         run: flutter pub get
 
