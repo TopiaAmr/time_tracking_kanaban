@@ -145,10 +145,12 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       final currentState = state as KanbanLoaded;
       final updatedTask = (result as Success<Task>).value;
 
-      // Create updated task lists
-      final updatedTasksBySection = Map<String, List<Task>>.from(
-        currentState.tasksBySection,
-      );
+      // Deep copy the map - copy both map and lists inside
+      final updatedTasksBySection = <String, List<Task>>{};
+      currentState.tasksBySection.forEach((key, value) {
+        updatedTasksBySection[key] = List<Task>.from(value);
+      });
+      
       final updatedTasksWithoutSection = List<Task>.from(
         currentState.tasksWithoutSection,
       );
@@ -166,9 +168,11 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
 
       // Add task to new location
       if (updatedTask.sectionId.isNotEmpty) {
-        updatedTasksBySection
-            .putIfAbsent(updatedTask.sectionId, () => [])
-            .add(updatedTask);
+        if (updatedTasksBySection.containsKey(updatedTask.sectionId)) {
+          updatedTasksBySection[updatedTask.sectionId]!.add(updatedTask);
+        } else {
+          updatedTasksBySection[updatedTask.sectionId] = [updatedTask];
+        }
       } else {
         updatedTasksWithoutSection.add(updatedTask);
       }
@@ -207,18 +211,23 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       final currentState = state as KanbanLoaded;
       final newTask = (result as Success<Task>).value;
 
-      final updatedTasksBySection = Map<String, List<Task>>.from(
-        currentState.tasksBySection,
-      );
+      // Deep copy the map - copy both map and lists inside
+      final updatedTasksBySection = <String, List<Task>>{};
+      currentState.tasksBySection.forEach((key, value) {
+        updatedTasksBySection[key] = List<Task>.from(value);
+      });
+      
       final updatedTasksWithoutSection = List<Task>.from(
         currentState.tasksWithoutSection,
       );
 
       // Add task to appropriate location
       if (newTask.sectionId.isNotEmpty) {
-        updatedTasksBySection
-            .putIfAbsent(newTask.sectionId, () => [])
-            .add(newTask);
+        if (updatedTasksBySection.containsKey(newTask.sectionId)) {
+          updatedTasksBySection[newTask.sectionId]!.add(newTask);
+        } else {
+          updatedTasksBySection[newTask.sectionId] = [newTask];
+        }
       } else {
         updatedTasksWithoutSection.add(newTask);
       }
@@ -254,9 +263,12 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       final currentState = state as KanbanLoaded;
       final updatedTask = (result as Success<Task>).value;
 
-      final updatedTasksBySection = Map<String, List<Task>>.from(
-        currentState.tasksBySection,
-      );
+      // Deep copy the map - copy both map and lists inside
+      final updatedTasksBySection = <String, List<Task>>{};
+      currentState.tasksBySection.forEach((key, value) {
+        updatedTasksBySection[key] = List<Task>.from(value);
+      });
+      
       final updatedTasksWithoutSection = List<Task>.from(
         currentState.tasksWithoutSection,
       );
@@ -320,9 +332,12 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     if (state is KanbanLoaded) {
       final currentState = state as KanbanLoaded;
 
-      final updatedTasksBySection = Map<String, List<Task>>.from(
-        currentState.tasksBySection,
-      );
+      // Deep copy the map - copy both map and lists inside
+      final updatedTasksBySection = <String, List<Task>>{};
+      currentState.tasksBySection.forEach((key, value) {
+        updatedTasksBySection[key] = List<Task>.from(value);
+      });
+      
       final updatedTasksWithoutSection = List<Task>.from(
         currentState.tasksWithoutSection,
       );
@@ -375,9 +390,12 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     if (state is KanbanLoaded) {
       final currentState = state as KanbanLoaded;
 
-      final updatedTasksBySection = Map<String, List<Task>>.from(
-        currentState.tasksBySection,
-      );
+      // Deep copy the map - copy both map and lists inside
+      final updatedTasksBySection = <String, List<Task>>{};
+      currentState.tasksBySection.forEach((key, value) {
+        updatedTasksBySection[key] = List<Task>.from(value);
+      });
+      
       final updatedTasksWithoutSection = List<Task>.from(
         currentState.tasksWithoutSection,
       );

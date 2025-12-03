@@ -267,7 +267,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
   }
 
   /// Show add task dialog.
-  void _showAddTaskDialog(BuildContext context, KanbanLoaded state) {
+  void _showAddTaskDialog(BuildContext context, KanbanLoaded state, {String? sectionId}) {
     final projectId = _getDefaultProjectId(state);
     if (projectId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -278,14 +278,13 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
       return;
     }
 
-    showDialog(
+    showAddTaskUI(
       context: context,
-      builder: (dialogContext) => AddTaskDialog(
-        defaultProjectId: projectId,
-        onCreateTask: (task) {
-          context.read<KanbanBloc>().add(CreateTask(task));
-        },
-      ),
+      defaultProjectId: projectId,
+      defaultSectionId: sectionId,
+      onCreateTask: (task) {
+        context.read<KanbanBloc>().add(CreateTask(task));
+      },
     );
   }
 
@@ -338,7 +337,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
           context.go('${RouteNames.tasks}/${task.id}');
         },
         onTaskDropped: (task) => _handleTaskDrop(context, task, section.id),
-        onAddTask: () => _showAddTaskDialog(context, state),
+        onAddTask: () => _showAddTaskDialog(context, state, sectionId: section.id),
       );
     }).toList();
 
@@ -353,7 +352,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
             context.go('${RouteNames.tasks}/${task.id}');
           },
           onTaskDropped: (task) => _handleTaskDrop(context, task, null),
-          onAddTask: () => _showAddTaskDialog(context, state),
+          onAddTask: () => _showAddTaskDialog(context, state, sectionId: null),
         ),
       );
     }

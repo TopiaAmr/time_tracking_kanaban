@@ -74,4 +74,55 @@ jobs:
           name: ios-profile-app
           path: build/ios/archive/Runner-profile.zip
 
+      - name: Update README with download links
+        run: |
+          # Get the run ID and repo info
+          RUN_ID="${{ github.run_id }}"
+          REPO="${{ github.repository }}"
+          COMMIT_SHA="${{ github.sha }}"
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          
+          # Create the download links section
+          cat > download_links.md << EOF
+          ## 📦 Latest Builds
+          
+          **Build from commit:** [\`${SHORT_SHA}\`](https://github.com/${REPO}/commit/${COMMIT_SHA})  
+          **Build date:** $(date -u +"%Y-%m-%d %H:%M UTC")
+          
+          ### Download Links
+          
+          - 🤖 [**Android APK (Profile)**](https://github.com/${REPO}/actions/runs/${RUN_ID})
+          - 🍎 [**iOS App (Profile)**](https://github.com/${REPO}/actions/runs/${RUN_ID})
+          
+          > **Note:** Click the links above to access the GitHub Actions run page, then scroll down to the "Artifacts" section to download the builds.
+          
+          EOF
+          
+          # Check if the section already exists in README
+          if grep -q "## 📦 Latest Builds" README.md; then
+            # Remove old section and add new one
+            sed -i.bak '/## 📦 Latest Builds/,/^## [^📦]/{ /^## [^📦]/!d; }' README.md
+            # Insert new section after Screenshots section
+            sed -i.bak '/^## Screenshots/,/^## Architecture/{
+              /^## Architecture/r download_links.md
+            }' README.md
+          else
+            # Insert new section after Screenshots section
+            sed -i.bak '/^## Architecture/r download_links.md' README.md
+          fi
+          
+          rm -f README.md.bak download_links.md
+
+      - name: Commit README changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update README with latest build links [skip ci]"
+            git push
+          fi
+
 

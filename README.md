@@ -11,6 +11,25 @@ A Flutter mobile application that combines **Kanban task management** with **Tim
 - 💬 **Task Comments**: Add comments to tasks via Todoist API
 - 🔄 **Auto Sync**: Automatically syncs data when connectivity is restored
 
+## Screenshots
+
+<div align="center">
+  <img src="screenshots/Simulator Screenshot - iPhone 16 Plus - 2025-12-04 at 01.35.31.png" width="250" alt="Kanban Board View"/>
+  <img src="screenshots/Simulator Screenshot - iPhone 16 Plus - 2025-12-04 at 01.35.38.png" width="250" alt="Task Details"/>
+  <img src="screenshots/Simulator Screenshot - iPhone 16 Plus - 2025-12-04 at 01.35.41.png" width="250" alt="Timer Tracking"/>
+</div>
+
+<div align="center">
+  <img src="screenshots/Simulator Screenshot - iPhone 16 Plus - 2025-12-04 at 01.35.45.png" width="250" alt="Task History"/>
+  <img src="screenshots/Simulator Screenshot - iPhone 16 Plus - 2025-12-04 at 01.35.48.png" width="250" alt="Comments View"/>
+  <img src="screenshots/Simulator Screenshot - iPhone 16 Plus - 2025-12-04 at 01.35.55.png" width="250" alt="Settings"/>
+</div>
+
+### Demo Videos
+
+- [iPhone Demo](screenshots/iphone_recording.mp4)
+- [macOS Demo](screenshots/macos_recording.mov)
+
 ## Architecture
 
 This project follows **Clean Architecture** principles with a feature-first structure:

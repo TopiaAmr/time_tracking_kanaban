@@ -1,10 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:time_tracking_kanaban/core/l10n/l10n.dart';
 import 'package:time_tracking_kanaban/core/services/haptic_service.dart';
+import 'package:time_tracking_kanaban/core/widgets/responsive.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 
-/// Dialog for creating a new task.
-class AddTaskDialog extends StatefulWidget {
+/// Shows add task UI as bottom sheet on mobile, dialog on desktop.
+Future<void> showAddTaskUI({
+  required BuildContext context,
+  required String defaultProjectId,
+  String? defaultSectionId,
+  required Function(Task) onCreateTask,
+}) {
+  final isMobile = context.isMobile;
+
+  if (isMobile) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: AddTaskForm(
+          defaultProjectId: defaultProjectId,
+          defaultSectionId: defaultSectionId,
+          onCreateTask: onCreateTask,
+        ),
+      ),
+    );
+  } else {
+    return showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.all(24),
+          child: AddTaskForm(
+            defaultProjectId: defaultProjectId,
+            defaultSectionId: defaultSectionId,
+            onCreateTask: onCreateTask,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Form widget for creating a new task.
+/// Used in both dialog and bottom sheet.
+class AddTaskForm extends StatefulWidget {
   /// Default project ID to use for the new task.
   final String defaultProjectId;
 
@@ -14,7 +60,7 @@ class AddTaskDialog extends StatefulWidget {
   /// Callback when task is created.
   final Function(Task) onCreateTask;
 
-  const AddTaskDialog({
+  const AddTaskForm({
     super.key,
     required this.defaultProjectId,
     this.defaultSectionId,
@@ -22,10 +68,10 @@ class AddTaskDialog extends StatefulWidget {
   });
 
   @override
-  State<AddTaskDialog> createState() => _AddTaskDialogState();
+  State<AddTaskForm> createState() => _AddTaskFormState();
 }
 
-class _AddTaskDialogState extends State<AddTaskDialog> {
+class _AddTaskFormState extends State<AddTaskForm> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -92,18 +138,14 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = context.isMobile;
 
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    final formContent = Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
               // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -203,6 +245,58 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
               ),
             ],
           ),
+        );
+
+    // Mobile: Bottom sheet with rounded top corners
+    if (isMobile) {
+      return Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: 20,
+        ),
+        child: formContent,
+      );
+    }
+
+    // Desktop: Already wrapped in Dialog by showAddTaskUI
+    return formContent;
+  }
+}
+
+/// Legacy widget for backward compatibility - use showAddTaskUI instead
+@Deprecated('Use showAddTaskUI function instead')
+class AddTaskDialog extends StatelessWidget {
+  final String defaultProjectId;
+  final String? defaultSectionId;
+  final Function(Task) onCreateTask;
+
+  const AddTaskDialog({
+    super.key,
+    required this.defaultProjectId,
+    this.defaultSectionId,
+    required this.onCreateTask,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
+        padding: const EdgeInsets.all(24),
+        child: AddTaskForm(
+          defaultProjectId: defaultProjectId,
+          defaultSectionId: defaultSectionId,
+          onCreateTask: onCreateTask,
         ),
       ),
     );

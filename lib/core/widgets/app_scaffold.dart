@@ -87,7 +87,9 @@ class AppScaffold extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
-    return Column(
+    final isMobile = context.isMobile;
+    
+    final content = Column(
       children: [
         // Header
         if (header != null) header!,
@@ -98,6 +100,15 @@ class AppScaffold extends StatelessWidget {
         ),
       ],
     );
+    
+    // Wrap in SafeArea on mobile to avoid notch/status bar overlap
+    if (isMobile) {
+      return SafeArea(
+        child: content,
+      );
+    }
+    
+    return content;
   }
 }
 
