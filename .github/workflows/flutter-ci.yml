@@ -26,15 +26,11 @@ jobs:
           cache: true
 
       - name: Create .env file from GitHub Secrets
-        env:
-          TODOIST_API_TOKEN: ${{ secrets.TODOIST_API_TOKEN }}
-          USE_REAL_API: ${{ secrets.USE_REAL_API }}
-          PROJECT_ID: ${{ secrets.PROJECT_ID }}
         run: |
           cat << 'EOF' > .env
-          TODOIST_API_TOKEN=${TODOIST_API_TOKEN}
-          USE_REAL_API=${USE_REAL_API}
-          PROJECT_ID=${PROJECT_ID}
+          TODOIST_API_TOKEN=${{ secrets.TODOIST_API_TOKEN }}
+          USE_REAL_API=${{ secrets.USE_REAL_API }}
+          PROJECT_ID=${{ secrets.PROJECT_ID }}
           EOF
 
       - name: Install dependencies
