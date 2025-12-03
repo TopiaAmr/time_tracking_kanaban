@@ -47,7 +47,7 @@ class _KanbanColumnSkeleton extends StatelessWidget {
       width: 300,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Column header
           Padding(
@@ -79,7 +79,8 @@ class _KanbanColumnSkeleton extends StatelessWidget {
             ),
           ),
           // Task cards
-          Expanded(
+          SizedBox(
+            height: 400,
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               itemCount: 4,
