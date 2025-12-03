@@ -67,6 +67,7 @@
   "historyCompletedTasks": "Tâches terminées",
   "overviewTitle": "Vue d'ensemble",
   "projectsTitle": "Projets",
-  "notificationsTitle": "Notifications"
+  "notificationsTitle": "Notifications",
+  "refresh": "Actualiser"
 }
 

@@ -10,7 +10,8 @@ import 'package:time_tracking_kanaban/features/tasks/domain/usecases/add_task_us
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/close_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/delete_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_sections_usecase.dart';
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart';
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart'
+    show GetTasksParams, GetTasksUseCase;
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/move_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/presentation/bloc/kanban_bloc.dart';
@@ -410,6 +411,91 @@ void main() {
         // Verify that StopTimerForTask was dispatched to TimerBloc
         verify(mockTimerBloc.add(any)).called(1);
       },
+    );
+
+    blocTest<KanbanBloc, KanbanState>(
+      'LoadKanbanTasks with forceRefresh: false passes forceRefresh: false to use case',
+      build: () {
+        final section1 = createSection(id: 'section1', name: 'Section 1');
+        final tasks = [createTask(id: '1', checked: false, sectionId: 'section1')];
+        when(mockGetTasksUseCase(any)).thenAnswer(
+          (_) async => Success(tasks),
+        );
+        when(mockGetSections(any)).thenAnswer(
+          (_) async => Success([section1]),
+        );
+        return kanbanBloc;
+      },
+      act: (bloc) => bloc.add(const LoadKanbanTasks(forceRefresh: false)),
+      verify: (_) {
+        final captured = verify(mockGetTasksUseCase(captureAny)).captured;
+        expect(captured.length, 1);
+        final params = captured.first as GetTasksParams;
+        expect(params.forceRefresh, false);
+      },
+    );
+
+    blocTest<KanbanBloc, KanbanState>(
+      'LoadKanbanTasks with forceRefresh: true passes forceRefresh: true to use case',
+      build: () {
+        final section1 = createSection(id: 'section1', name: 'Section 1');
+        final tasks = [createTask(id: '1', checked: false, sectionId: 'section1')];
+        when(mockGetTasksUseCase(any)).thenAnswer(
+          (_) async => Success(tasks),
+        );
+        when(mockGetSections(any)).thenAnswer(
+          (_) async => Success([section1]),
+        );
+        return kanbanBloc;
+      },
+      act: (bloc) => bloc.add(const LoadKanbanTasks(forceRefresh: true)),
+      verify: (_) {
+        final captured = verify(mockGetTasksUseCase(captureAny)).captured;
+        expect(captured.length, 1);
+        final params = captured.first as GetTasksParams;
+        expect(params.forceRefresh, true);
+      },
+    );
+
+    blocTest<KanbanBloc, KanbanState>(
+      'refresh (forceRefresh: true) updates state with fresh data from API',
+      build: () {
+        final section1 = createSection(id: 'section1', name: 'Section 1');
+        final initialTasks = [createTask(id: '1', checked: false, sectionId: 'section1')];
+        final refreshedTasks = [
+          createTask(id: '1', checked: false, sectionId: 'section1'),
+          createTask(id: '2', checked: false, sectionId: 'section1'),
+        ];
+        
+        var callCount = 0;
+        when(mockGetTasksUseCase(any)).thenAnswer((_) async {
+          callCount++;
+          if (callCount == 1) {
+            return Success(initialTasks);
+          }
+          return Success(refreshedTasks);
+        });
+        when(mockGetSections(any)).thenAnswer(
+          (_) async => Success([section1]),
+        );
+        return kanbanBloc;
+      },
+      act: (bloc) async {
+        // First load
+        bloc.add(const LoadKanbanTasks(forceRefresh: false));
+        await Future.delayed(const Duration(milliseconds: 100));
+        // Refresh
+        bloc.add(const LoadKanbanTasks(forceRefresh: true));
+      },
+      expect: () => [
+        const KanbanLoading(),
+        predicate<KanbanLoaded>((state) {
+          return state.tasksBySection['section1']?.length == 1;
+        }),
+        predicate<KanbanLoaded>((state) {
+          return state.tasksBySection['section1']?.length == 2;
+        }),
+      ],
     );
   });
 }

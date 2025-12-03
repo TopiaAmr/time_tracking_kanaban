@@ -44,11 +44,13 @@ class MockTasksRepository extends _i1.Mock implements _i2.TasksRepository {
   _i3.Future<_i4.Result<List<_i5.Task>>> getTasks({
     String? projectId,
     String? sectionId,
+    bool? forceRefresh = false,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getTasks, [], {
               #projectId: projectId,
               #sectionId: sectionId,
+              #forceRefresh: forceRefresh,
             }),
             returnValue: _i3.Future<_i4.Result<List<_i5.Task>>>.value(
               _i6.dummyValue<_i4.Result<List<_i5.Task>>>(
@@ -56,6 +58,7 @@ class MockTasksRepository extends _i1.Mock implements _i2.TasksRepository {
                 Invocation.method(#getTasks, [], {
                   #projectId: projectId,
                   #sectionId: sectionId,
+                  #forceRefresh: forceRefresh,
                 }),
               ),
             ),
@@ -171,13 +174,22 @@ class MockTasksRepository extends _i1.Mock implements _i2.TasksRepository {
           as _i3.Future<_i4.Result<_i7.Project>>);
 
   @override
-  _i3.Future<_i4.Result<List<_i8.Section>>> getSections({String? projectId}) =>
+  _i3.Future<_i4.Result<List<_i8.Section>>> getSections({
+    String? projectId,
+    bool? forceRefresh = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#getSections, [], {#projectId: projectId}),
+            Invocation.method(#getSections, [], {
+              #projectId: projectId,
+              #forceRefresh: forceRefresh,
+            }),
             returnValue: _i3.Future<_i4.Result<List<_i8.Section>>>.value(
               _i6.dummyValue<_i4.Result<List<_i8.Section>>>(
                 this,
-                Invocation.method(#getSections, [], {#projectId: projectId}),
+                Invocation.method(#getSections, [], {
+                  #projectId: projectId,
+                  #forceRefresh: forceRefresh,
+                }),
               ),
             ),
           )

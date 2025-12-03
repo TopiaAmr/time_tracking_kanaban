@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:time_tracking_kanaban/core/database/app_database.dart';
@@ -109,8 +110,82 @@ class TasksLocalDataSource {
   }
 
   /// Caches a list of tasks in the database.
-  Future<Result<void>> cacheTasks(List<TaskModel> tasks) async {
+  /// 
+  /// If [clearExisting] is true, removes all tasks except unsynced ones before inserting new ones,
+  /// then removes any unsynced tasks that don't exist in the new data.
+  Future<Result<void>> cacheTasks(
+    List<TaskModel> tasks, {
+    bool clearExisting = false,
+  }) async {
     try {
+      if (clearExisting) {
+        developer.log(
+          '🗑️ Clearing existing tasks before caching...',
+          name: 'TasksLocalDataSource',
+        );
+        
+        // Get IDs of tasks from API
+        final apiTaskIds = tasks.map((t) => t.id).toList();
+        developer.log(
+          '📋 API task IDs: ${apiTaskIds.join(", ")}',
+          name: 'TasksLocalDataSource',
+        );
+        
+        // Get all current tasks to see what we're deleting
+        final currentTasks = await _db.select(_db.tasksTable).get();
+        developer.log(
+          '📊 Current DB has ${currentTasks.length} tasks',
+          name: 'TasksLocalDataSource',
+        );
+        for (final task in currentTasks) {
+          developer.log(
+            '  - ${task.id} (isSynced: ${task.isSynced}, content: ${task.content})',
+            name: 'TasksLocalDataSource',
+          );
+        }
+        
+        // Delete all synced tasks
+        final syncedDeleted = await (_db.delete(_db.tasksTable)
+              ..where((tbl) => tbl.isSynced.equals(true)))
+            .go();
+        developer.log(
+          '✂️ Deleted $syncedDeleted synced tasks',
+          name: 'TasksLocalDataSource',
+        );
+        
+        // Delete unsynced tasks that are not in the API response
+        // (they were likely created in tests or deleted on server)
+        int unsyncedDeleted = 0;
+        if (apiTaskIds.isNotEmpty) {
+          unsyncedDeleted = await (_db.delete(_db.tasksTable)
+                ..where((tbl) => 
+                  tbl.isSynced.equals(false) & 
+                  tbl.id.isNotIn(apiTaskIds)))
+              .go();
+        } else {
+          // If no API tasks, delete all unsynced tasks
+          unsyncedDeleted = await (_db.delete(_db.tasksTable)
+                ..where((tbl) => tbl.isSynced.equals(false)))
+              .go();
+        }
+        developer.log(
+          '✂️ Deleted $unsyncedDeleted unsynced tasks not in API response',
+          name: 'TasksLocalDataSource',
+        );
+        
+        // Check what's left
+        final remainingTasks = await _db.select(_db.tasksTable).get();
+        developer.log(
+          '📊 After cleanup, DB has ${remainingTasks.length} tasks remaining',
+          name: 'TasksLocalDataSource',
+        );
+      }
+
+      developer.log(
+        '💾 Inserting ${tasks.length} tasks into cache...',
+        name: 'TasksLocalDataSource',
+      );
+      
       await _db.batch((batch) {
         for (final task in tasks) {
           batch.insert(
@@ -148,6 +223,8 @@ class TasksLocalDataSource {
           );
         }
       });
+      
+      developer.log('✅ Tasks cached successfully', name: 'TasksLocalDataSource');
       return const Success(null);
     } catch (e) {
       return Error(CacheFailure([e.toString()]));
@@ -266,8 +343,18 @@ class TasksLocalDataSource {
   }
 
   /// Caches a list of sections in the database.
-  Future<Result<void>> cacheSections(List<SectionModel> sections) async {
+  /// 
+  /// If [clearExisting] is true, removes all existing sections before inserting new ones.
+  Future<Result<void>> cacheSections(
+    List<SectionModel> sections, {
+    bool clearExisting = false,
+  }) async {
     try {
+      if (clearExisting) {
+        // Delete all existing sections
+        await _db.delete(_db.sectionsTable).go();
+      }
+
       await _db.batch((batch) {
         for (final section in sections) {
           batch.insert(

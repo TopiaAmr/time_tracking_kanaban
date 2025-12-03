@@ -13,7 +13,12 @@ abstract class TasksRepository {
   ///
   /// If both [projectId] and [sectionId] are provided, returns tasks
   /// that match both criteria. If neither is provided, returns all tasks.
-  Future<Result<List<Task>>> getTasks({String? projectId, String? sectionId});
+  /// If [forceRefresh] is true, fetches from API and updates local cache.
+  Future<Result<List<Task>>> getTasks({
+    String? projectId,
+    String? sectionId,
+    bool forceRefresh = false,
+  });
 
   /// Retrieves a single task by its [id].
   Future<Result<Task>> getTask(String id);
@@ -56,7 +61,11 @@ abstract class TasksRepository {
   ///
   /// If [projectId] is provided, returns only sections for that project.
   /// If not provided, returns all sections.
-  Future<Result<List<Section>>> getSections({String? projectId});
+  /// If [forceRefresh] is true, fetches from API and updates local cache.
+  Future<Result<List<Section>>> getSections({
+    String? projectId,
+    bool forceRefresh = false,
+  });
 
   /// Retrieves a single section by its [id].
   Future<Result<Section>> getSection(String id);

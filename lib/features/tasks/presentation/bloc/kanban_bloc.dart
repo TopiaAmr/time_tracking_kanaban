@@ -1,15 +1,17 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:time_tracking_kanaban/core/usecases/usecase.dart';
 import 'package:time_tracking_kanaban/core/utils/result.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/section.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/add_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/close_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/delete_task_usecase.dart';
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_sections_usecase.dart';
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart';
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_sections_usecase.dart'
+    show GetSections, GetSectionsParams;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart'
+    show GetTasksParams, GetTasksUseCase;
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/move_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_bloc.dart';
@@ -72,13 +74,27 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     LoadKanbanTasks event,
     Emitter<KanbanState> emit,
   ) async {
+    developer.log(
+      '📥 LoadKanbanTasks event received (forceRefresh: ${event.forceRefresh})',
+      name: 'KanbanBloc',
+    );
+    
     // Only show loading if we don't already have loaded data
     if (state is! KanbanLoaded) {
       emit(const KanbanLoading());
     }
 
-    final tasksResult = await _getTasks(NoParams());
-    final sectionsResult = await _getSections(NoParams());
+    final tasksResult = await _getTasks(
+      GetTasksParams(forceRefresh: event.forceRefresh),
+    );
+    final sectionsResult = await _getSections(
+      GetSectionsParams(forceRefresh: event.forceRefresh),
+    );
+    
+    developer.log(
+      '📊 Fetched ${tasksResult is Success ? (tasksResult as Success).value.length : 0} tasks',
+      name: 'KanbanBloc',
+    );
 
     if (tasksResult is Error<List<Task>>) {
       // Only emit error if we don't have existing data to show

@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:time_tracking_kanaban/core/l10n/l10n.dart';
@@ -64,6 +65,10 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
           });
         },
         filtersOpen: _filtersOpen,
+        onRefresh: () {
+          developer.log('🔄 Refresh button clicked', name: 'KanbanBoard');
+          context.read<KanbanBloc>().add(const LoadKanbanTasks(forceRefresh: true));
+        },
         onToggleFilters: () {
           if (isMobile) {
             // Show modal bottom sheet on mobile

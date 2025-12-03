@@ -67,6 +67,7 @@
   "historyCompletedTasks": "Tamamlanan Görevler",
   "overviewTitle": "Genel Bakış",
   "projectsTitle": "Projeler",
-  "notificationsTitle": "Bildirimler"
+  "notificationsTitle": "Bildirimler",
+  "refresh": "Yenile"
 }
 

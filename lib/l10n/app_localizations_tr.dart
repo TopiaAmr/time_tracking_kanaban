@@ -305,4 +305,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get notificationsTitle => 'Bildirimler';
+
+  @override
+  String get refresh => 'Yenile';
 }

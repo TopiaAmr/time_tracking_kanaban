@@ -305,4 +305,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get notificationsTitle => 'Benachrichtigungen';
+
+  @override
+  String get refresh => 'Aktualisieren';
 }

@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:time_tracking_kanaban/core/errors/failure.dart';
@@ -36,49 +37,101 @@ class TasksRepositoryImpl implements TasksRepository {
   Future<Result<List<Task>>> getTasks({
     String? projectId,
     String? sectionId,
+    bool forceRefresh = false,
   }) async {
-    // Check cache first
+    developer.log(
+      '🔍 getTasks called (forceRefresh: $forceRefresh)',
+      name: 'TasksRepository',
+    );
+    
+    // Check cache first (unless force refresh)
     final cachedResult = await localDataSource.getCachedTasks(
       projectId: projectId,
       sectionId: sectionId,
     );
     
-    // If we have cached data, return it immediately
-    if (cachedResult is Success<List<Task>> && cachedResult.value.isNotEmpty) {
+    developer.log(
+      '💾 Cache has ${cachedResult is Success ? (cachedResult as Success).value.length : 0} tasks',
+      name: 'TasksRepository',
+    );
+    
+    // If we have cached data and not forcing refresh, return it immediately
+    if (!forceRefresh && cachedResult is Success<List<Task>> && cachedResult.value.isNotEmpty) {
+      developer.log('✅ Returning cached tasks', name: 'TasksRepository');
       return cachedResult;
     }
 
-    // No cache or empty - fetch from API
+    // No cache, empty cache, or force refresh - fetch from API
     final isConnected = await connectivityService.isConnected();
+    developer.log('🌐 Connected: $isConnected', name: 'TasksRepository');
 
     if (isConnected) {
       try {
+        developer.log('🌍 Fetching tasks from API...', name: 'TasksRepository');
         // Fetch from API
         final models = await api.getTasks(
           projectId: projectId,
           sectionId: sectionId,
         );
-        // Cache the results
-        final cacheResult = await localDataSource.cacheTasks(models);
+        developer.log(
+          '📦 API returned ${models.length} tasks',
+          name: 'TasksRepository',
+        );
+        developer.log(
+          '📋 Task IDs from API: ${models.map((t) => t.id).join(", ")}',
+          name: 'TasksRepository',
+        );
+        // Cache the results - clear existing if force refreshing
+        developer.log(
+          '💿 Caching tasks (clearExisting: $forceRefresh)...',
+          name: 'TasksRepository',
+        );
+        final cacheResult = await localDataSource.cacheTasks(
+          models,
+          clearExisting: forceRefresh,
+        );
         if (cacheResult is Error) {
-          // If caching fails, still return the API data
+          developer.log('⚠️ Caching failed!', name: 'TasksRepository');
+        } else {
+          developer.log('✅ Tasks cached successfully', name: 'TasksRepository');
         }
         // Return cached data (following specs: check internet -> fetch API -> save to Drift -> return Drift data)
-        return await localDataSource.getCachedTasks(
+        final result = await localDataSource.getCachedTasks(
           projectId: projectId,
           sectionId: sectionId,
         );
+        developer.log(
+          '📤 Returning ${result is Success ? (result as Success).value.length : 0} tasks to caller',
+          name: 'TasksRepository',
+        );
+        if (result is Success) {
+          final tasks = (result as Success<List<Task>>).value;
+          developer.log(
+            '📋 Returning task IDs: ${tasks.map((t) => t.id).join(", ")}',
+            name: 'TasksRepository',
+          );
+        }
+        return result;
       } on DioException catch (e) {
+        developer.log(
+          '❌ DioException: ${e.message}, type: ${e.type}, response: ${e.response?.statusCode}',
+          name: 'TasksRepository',
+        );
+        developer.log('❌ Error details: ${e.error}', name: 'TasksRepository');
         // If API fails, try to return cached data
         if (cachedResult is Success) {
+          developer.log('⚠️ Returning cached data due to API error', name: 'TasksRepository');
           return cachedResult;
         }
         return Error<List<Task>>(
           ServerFailure([e.message, e.response?.statusCode]),
         );
-      } catch (e) {
+      } catch (e, stackTrace) {
+        developer.log('❌ Exception: $e', name: 'TasksRepository');
+        developer.log('❌ StackTrace: $stackTrace', name: 'TasksRepository');
         // If API fails, try to return cached data
         if (cachedResult is Success) {
+          developer.log('⚠️ Returning cached data due to exception', name: 'TasksRepository');
           return cachedResult;
         }
         return Error<List<Task>>(NetworkFailure([e.toString()]));
@@ -568,21 +621,35 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   @override
-  Future<Result<List<Section>>> getSections({String? projectId}) async {
+  Future<Result<List<Section>>> getSections({
+    String? projectId,
+    bool forceRefresh = false,
+  }) async {
+    // Check cache first (unless force refresh)
+    final cachedResult = await localDataSource.getCachedSections(
+      projectId: projectId,
+    );
+    
+    // If we have cached data and not forcing refresh, return it immediately
+    if (!forceRefresh && cachedResult is Success<List<Section>> && cachedResult.value.isNotEmpty) {
+      return cachedResult;
+    }
+
+    // No cache, empty cache, or force refresh - fetch from API
     final isConnected = await connectivityService.isConnected();
 
     if (isConnected) {
       try {
         final models = await api.getSections(projectId: projectId);
-        // Cache the results
-        await localDataSource.cacheSections(models);
+        // Cache the results - clear existing if force refreshing
+        await localDataSource.cacheSections(
+          models,
+          clearExisting: forceRefresh,
+        );
         // Return cached data
         return await localDataSource.getCachedSections(projectId: projectId);
       } on DioException catch (e) {
         // If API fails, try cached data
-        final cachedResult = await localDataSource.getCachedSections(
-          projectId: projectId,
-        );
         if (cachedResult is Success) {
           return cachedResult;
         }
@@ -591,9 +658,6 @@ class TasksRepositoryImpl implements TasksRepository {
         );
       } catch (e) {
         // If API fails, try cached data
-        final cachedResult = await localDataSource.getCachedSections(
-          projectId: projectId,
-        );
         if (cachedResult is Success) {
           return cachedResult;
         }
@@ -601,7 +665,7 @@ class TasksRepositoryImpl implements TasksRepository {
       }
     } else {
       // Offline: return cached data
-      return await localDataSource.getCachedSections(projectId: projectId);
+      return cachedResult;
     }
   }
 

@@ -293,13 +293,24 @@ class MockTasksLocalDataSource extends _i1.Mock
           as _i7.Future<_i10.Result<void>>);
 
   @override
-  _i7.Future<_i10.Result<void>> cacheTasks(List<_i4.TaskModel>? tasks) =>
+  _i7.Future<_i10.Result<void>> cacheTasks(
+    List<_i4.TaskModel>? tasks, {
+    bool? clearExisting = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#cacheTasks, [tasks]),
+            Invocation.method(
+              #cacheTasks,
+              [tasks],
+              {#clearExisting: clearExisting},
+            ),
             returnValue: _i7.Future<_i10.Result<void>>.value(
               _i12.dummyValue<_i10.Result<void>>(
                 this,
-                Invocation.method(#cacheTasks, [tasks]),
+                Invocation.method(
+                  #cacheTasks,
+                  [tasks],
+                  {#clearExisting: clearExisting},
+                ),
               ),
             ),
           )
@@ -383,14 +394,23 @@ class MockTasksLocalDataSource extends _i1.Mock
 
   @override
   _i7.Future<_i10.Result<void>> cacheSections(
-    List<_i3.SectionModel>? sections,
-  ) =>
+    List<_i3.SectionModel>? sections, {
+    bool? clearExisting = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#cacheSections, [sections]),
+            Invocation.method(
+              #cacheSections,
+              [sections],
+              {#clearExisting: clearExisting},
+            ),
             returnValue: _i7.Future<_i10.Result<void>>.value(
               _i12.dummyValue<_i10.Result<void>>(
                 this,
-                Invocation.method(#cacheSections, [sections]),
+                Invocation.method(
+                  #cacheSections,
+                  [sections],
+                  {#clearExisting: clearExisting},
+                ),
               ),
             ),
           )

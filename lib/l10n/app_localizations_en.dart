@@ -304,4 +304,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsTitle => 'Notifications';
+
+  @override
+  String get refresh => 'Refresh';
 }

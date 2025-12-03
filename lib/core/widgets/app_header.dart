@@ -34,6 +34,9 @@ class AppHeader extends StatelessWidget {
   /// Callback when back button is pressed. If null, uses Navigator.pop.
   final VoidCallback? onBackPressed;
 
+  /// Callback when refresh button is pressed.
+  final VoidCallback? onRefresh;
+
   const AppHeader({
     super.key,
     required this.title,
@@ -44,6 +47,7 @@ class AppHeader extends StatelessWidget {
     this.onToggleFilters,
     this.showBackButton = false,
     this.onBackPressed,
+    this.onRefresh,
   });
 
   @override
@@ -119,6 +123,13 @@ class AppHeader extends StatelessWidget {
                 // Language switcher
                 _LanguageSwitcher(),
                 const SizedBox(width: 8),
+                // Refresh button
+                if (onRefresh != null)
+                  IconButton(
+                    onPressed: onRefresh,
+                    icon: const Icon(Icons.refresh),
+                    tooltip: context.l10n.refresh,
+                  ),
                 // Filters button
                 if (onToggleFilters != null)
                   IconButton(
@@ -160,6 +171,13 @@ class AppHeader extends StatelessWidget {
                 const SizedBox(width: 8),
                 // Language switcher (mobile)
                 _LanguageSwitcher(isCompact: true),
+                // Refresh button (mobile)
+                if (onRefresh != null)
+                  IconButton(
+                    onPressed: onRefresh,
+                    icon: const Icon(Icons.refresh),
+                    tooltip: context.l10n.refresh,
+                  ),
                 if (onToggleFilters != null) ...[
                   const SizedBox(width: 8),
                   IconButton(

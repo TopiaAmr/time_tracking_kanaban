@@ -109,6 +109,7 @@
   "historyCompletedTasks": "Completed Tasks",
   "overviewTitle": "Overview",
   "projectsTitle": "Projects",
-  "notificationsTitle": "Notifications"
+  "notificationsTitle": "Notifications",
+  "refresh": "Refresh"
 }
 

@@ -11,7 +11,13 @@ abstract class KanbanEvent extends Equatable {
 
 /// Event to load all tasks and group them into Kanban columns.
 class LoadKanbanTasks extends KanbanEvent {
-  const LoadKanbanTasks();
+  /// Whether to force refresh from API and update local cache.
+  final bool forceRefresh;
+
+  const LoadKanbanTasks({this.forceRefresh = false});
+
+  @override
+  List<Object?> get props => [forceRefresh];
 }
 
 /// Event to move a task between columns.
