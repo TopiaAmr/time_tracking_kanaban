@@ -36,10 +36,12 @@ class CommentsCubit extends Cubit<CommentsState> {
 
   /// Loads comments for a task.
   Future<void> loadComments(String taskId) async {
+    if (isClosed) return;
     emit(const CommentsLoading());
 
     final result = await _getTaskComments(GetTaskCommentsParams(taskId));
 
+    if (isClosed) return;
     if (result is Error<List<Comment>>) {
       emit(CommentsError(result.failure));
       return;
@@ -51,12 +53,14 @@ class CommentsCubit extends Cubit<CommentsState> {
 
   /// Adds a new comment to a task.
   Future<void> addComment(String taskId, String content) async {
+    if (isClosed) return;
     emit(const CommentsLoading());
 
     final result = await _addComment(
       AddCommentParams(taskId: taskId, content: content),
     );
 
+    if (isClosed) return;
     if (result is Error<Comment>) {
       emit(CommentsError(result.failure));
       return;
@@ -68,12 +72,14 @@ class CommentsCubit extends Cubit<CommentsState> {
 
   /// Updates an existing comment.
   Future<void> updateComment(Comment comment, String newContent) async {
+    if (isClosed) return;
     emit(const CommentsLoading());
 
     final result = await _updateComment(
       UpdateCommentParams(commentId: comment.id, content: newContent),
     );
 
+    if (isClosed) return;
     if (result is Error<Comment>) {
       emit(CommentsError(result.failure));
       return;
@@ -85,10 +91,12 @@ class CommentsCubit extends Cubit<CommentsState> {
 
   /// Deletes a comment.
   Future<void> deleteComment(String commentId, String taskId) async {
+    if (isClosed) return;
     emit(const CommentsLoading());
 
     final result = await _deleteComment(DeleteCommentParams(commentId));
 
+    if (isClosed) return;
     if (result is Error<void>) {
       emit(CommentsError(result.failure));
       return;
