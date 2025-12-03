@@ -21,7 +21,18 @@ This project follows **Clean Architecture** principles with a feature-first stru
 
 ### State Management
 
-The app uses **BLoC (Business Logic Component)** pattern for state management, providing a clear separation of concerns and testability.
+The app uses the **BLoC (Business Logic Component)** pattern, implemented with `flutter_bloc`, and applies a deliberate split between **BLoCs** and **Cubits**:
+
+- **BLoCs** are used for **complex, event‑driven flows** with multiple types of inputs and state transitions:
+  - `KanbanBloc`: Handles loading tasks and sections, grouping them into Kanban columns (To Do, In Progress, Done), and processing create/update/move/close/delete task events.
+  - `TimerBloc`: Manages the lifecycle of timers (start, pause, resume, stop, tick, and loading of active timers) and coordinates with the Drift database.
+- **Cubits** are used for **simpler view‑state and configuration** where a single intent method can emit new states directly:
+  - `ThemeCubit`: Manages light/dark theme selection.
+  - `L10nCubit`: Manages the current locale and language switching.
+  - `CommentsCubit`: Manages loading, adding, and updating comments for a given task, exposing straightforward states to the UI.
+  - `TaskHistoryCubit`: Manages the list of completed tasks and their aggregated time history.
+
+This split keeps **complex features** (Kanban, timer) fully traceable and easy to test via events and states, while **simple UI or configuration concerns** remain lightweight and easy to reason about with Cubits.
 
 ## Prerequisites
 
@@ -143,137 +154,217 @@ The Flutter development environment supports hot reload:
 
 ## Testing
 
-### Unit and Widget Tests
+This project was built with a **testing-first mindset** and a clear separation between different types of tests. The goals are to keep business logic testable, UI behavior verifiable, and full user flows covered end‑to‑end.
 
-Run all unit and widget tests (excludes integration tests):
+### Testing Philosophy
+
+- **Unit Tests**: Verify pure Dart logic (entities, use cases, repositories, BLoCs/Cubits, and widget logic such as calculations and data transformations) without rendering widgets.
+- **Widget Tests (`testWidgets`)**: Verify UI rendering, layout, and widget‑level interactions for reusable components.
+- **Integration Tests**: Verify complete user flows, navigation, and cross‑layer behavior on real or emulated devices.
+
+The separation is:
+- **`test/`**: Unit tests and widget tests for core utilities, data/domain layers, and presentation logic.
+- **`integration_test/`**: Integration tests that boot the full app and drive flows through the UI.
+
+### Test Directory Structure
+
+```text
+test/
+├── core/
+│   ├── database/                # Drift database tests
+│   ├── network/                 # Networking and interceptors
+│   └── widgets/                 # Unit/widget tests for shared widgets
+├── features/
+│   ├── tasks/
+│   │   ├── data/                # Data layer tests (datasources, models, repositories)
+│   │   ├── domain/              # Entities and use cases tests
+│   │   └── presentation/        # Kanban BLoC/Cubit tests
+│   └── timer/
+│       ├── data/                # Timer datasources and repositories tests
+│       ├── domain/              # Timer entities and use cases tests
+│       └── presentation/        # Timer BLoC/Cubit/widget tests
+└── mocks/                       # Reusable mocks and test helpers
+
+integration_test/
+├── app_test.dart                # End‑to‑end app initialization test
+├── fixtures/                    # Shared integration test data
+├── flows/                       # High‑level user flows (tasks, timer, comments)
+├── helpers/                     # Test harness and app bootstrap helpers
+├── mocks/                       # Integration‑specific mocks
+└── robots/                      # Page/feature robots for readable flows
+```
+
+### Unit Tests
+
+Unit tests focus on:
+- **Business rules** (e.g., how tasks are grouped into Kanban columns).
+- **Use case orchestration** (e.g., starting, pausing, and stopping timers).
+- **Data transformations** (e.g., mapping Todoist DTOs to domain entities).
+- **State calculations** in BLoCs and Cubits.
+
+Run all unit tests in the `test/` directory:
 
 ```bash
 flutter test test/
 ```
 
-Or run all tests in the test directory:
-
-```bash
-flutter test
-```
-
-Run tests for a specific file:
+Run a specific unit test file:
 
 ```bash
 flutter test test/path/to/test_file.dart
 ```
 
-**Note**: Integration tests in `integration_test/` require a device/emulator and should be run separately (see below).
+### Widget Tests (`testWidgets`)
+
+Widget tests are used when you need to render a widget tree and verify:
+- UI rendering and layout.
+- Widget‑level interactions (taps, gestures) in isolation.
+- Composition of shared widgets (e.g., task cards, columns, dialogs).
+
+Widget tests live alongside other tests in `test/core/widgets/` and in the corresponding `features/**/presentation/widgets/` test folders.
 
 ### Integration Tests
 
-Integration tests run on real devices/emulators and test complete user flows. They require a connected device or emulator.
+Integration tests run against a **real device or emulator** and boot the full application. They are responsible for:
+- Testing end‑to‑end flows (e.g., create task → move between columns → complete task → view history).
+- Verifying navigation, routing, and screen composition.
+- Exercising timer flows from the UI point of view.
+- Validating error handling and user feedback in real scenarios.
 
-**To run integration tests:**
+Run all integration tests:
 
 ```bash
-# Run all integration tests (requires device/emulator)
 flutter test integration_test/
+```
 
-# Run specific integration test
-flutter test integration_test/screens/task_history_integration_test.dart
+Run a specific integration test:
 
-# Run on specific device
+```bash
+flutter test integration_test/flows/task_management_test.dart
+```
+
+Run on a specific device:
+
+```bash
 flutter test integration_test/ -d <device_id>
 ```
 
-**Important**: 
-- Integration tests require a device/emulator to be running
-- Do NOT run `dart test` on integration tests - use `flutter test` instead
-- Integration tests are automatically excluded from regular `flutter test` runs when you specify the `test/` directory
+#### API‑Level Integration Tests
 
-### API Integration Tests
+Some tests exercise the real Todoist API through the configured HTTP client. These tests are backed by environment variables and are **opt‑in**:
 
-API integration tests are configured to use mock data by default. To run tests against the real Todoist API:
-
-1. Set `USE_REAL_API=true` in your `.env` file
-2. Ensure `TODOIST_API_TOKEN` is set with a valid token
-3. Run the integration tests:
+1. Set `USE_REAL_API=true` in your `.env` file.
+2. Ensure `TODOIST_API_TOKEN` is set with a valid token.
+3. Run the API integration tests:
 
 ```bash
 flutter test test/features/tasks/data/datasources/todoist_api_integration_test.dart
 ```
 
-**Note**: Integration tests that use the real API may create test data in your Todoist account. Tests attempt to clean up, but use caution.
+Tests that hit the real API may create temporary data in your Todoist account. They attempt to clean up, but you should still treat them as **test‑only**.
+
+### Running All Tests
+
+Run the entire test suite (unit, widget, and any integration tests under `test/` and `integration_test/`):
+
+```bash
+flutter test
+```
 
 ### Test Coverage
 
-Generate test coverage report:
+Generate a coverage report:
 
 ```bash
 flutter test --coverage
 ```
 
-View the coverage report (requires `lcov`):
-
-```bash
-genhtml coverage/lcov.info -o coverage/html
-open coverage/html/index.html
-```
+You can use `lcov`/`genhtml` locally to visualize coverage if desired. The target is:
+- **80%+ coverage** for core business logic (use cases, repositories, entities, BLoCs/Cubits).
+- Coverage of all critical user flows via integration tests.
 
 ## Project Structure
 
 ```
 lib/
-├── core/                          # Core functionality
-│   ├── errors/                    # Error handling
-│   ├── network/                   # Network configuration
-│   │   ├── todoist_api.dart      # Retrofit API client
-│   │   ├── network_module.dart   # Dependency injection
-│   │   └── todoist_response_interceptor.dart
-│   ├── usecases/                  # Base use case classes
-│   ├── utils/                     # Utility classes
-│   └── widgets/                   # Shared widgets
+├── core/                           # Cross-cutting concerns and shared building blocks
+│   ├── database/                   # Drift database and DAOs
+│   ├── errors/                     # Failure and exception abstractions
+│   ├── l10n/                       # Localization cubit and helpers
+│   ├── navigation/                 # App router configuration (go_router)
+│   ├── network/                    # Dio/Retrofit client, interceptors, modules
+│   ├── preferences/                # Shared preferences helpers
+│   ├── screens/                    # Shell/root screens shared across features
+│   ├── services/                   # Cross-cutting services
+│   ├── theme/                      # Theme cubit, colors, typography
+│   ├── usecases/                   # Base use case abstractions
+│   ├── utils/                      # Utility classes and helpers
+│   └── widgets/                    # Shared UI widgets
 ├── features/
-│   ├── tasks/                     # Task management feature
-│   │   ├── data/                  # Data layer
-│   │   │   ├── datasources/       # Data sources (local/remote)
-│   │   │   ├── models/            # Data models/DTOs
-│   │   │   └── repositories/      # Repository implementations
-│   │   ├── domain/                # Domain layer
-│   │   │   ├── entities/          # Business entities
-│   │   │   ├── repositories/      # Abstract repositories
-│   │   │   └── usecases/          # Business logic
-│   │   └── presentation/          # Presentation layer
-│   │       ├── bloc/              # BLoC state management
-│   │       └── widgets/           # UI components
-│   └── timer/                     # Time tracking feature
-│       └── [similar structure]
-├── di.dart                        # Dependency injection entry
-├── di.config.dart                 # Generated DI code
-└── main.dart                      # Application entry point
+│   ├── tasks/                      # Task / Kanban board feature
+│   │   ├── data/                   # Data layer
+│   │   │   ├── datasources/        # Local (Drift) and remote (Todoist API) datasources
+│   │   │   ├── models/             # DTOs and persistence models
+│   │   │   └── repositories/       # Repository implementations
+│   │   ├── domain/                 # Domain layer
+│   │   │   ├── entities/           # Pure business entities
+│   │   │   ├── repositories/       # Abstract repository contracts
+│   │   │   └── usecases/           # Task-related business logic
+│   │   └── presentation/           # Presentation layer
+│   │       ├── bloc/               # Kanban BLoCs
+│   │       ├── cubit/              # Comments and other UI state Cubits
+│   │       └── widgets/            # Feature-specific widgets and screens
+│   └── timer/                      # Time tracking feature
+│       ├── data/                   # Timer data layer
+│       ├── domain/                 # Timer entities and use cases
+│       └── presentation/           # Timer BLoC, cubits, and widgets
+├── di.dart                         # Dependency injection entrypoint
+├── di.config.dart                  # Generated DI configuration (injectable)
+└── main.dart                       # Application entry point
 
 test/
-├── core/                          # Core tests
-├── features/                      # Feature tests
-└── mocks/                         # Mock objects
+├── core/                           # Tests for core utilities, widgets, and services
+├── features/                       # Tests for tasks and timer features
+└── mocks/                          # Shared mocks and test setup
+
+integration_test/
+├── app_test.dart                   # Full app smoke test
+├── fixtures/                       # Reusable test data
+├── flows/                          # High‑level user flow tests
+├── helpers/                        # Test harness and app bootstrap
+├── mocks/                          # Integration‑specific mocks
+└── robots/                         # Screen/feature robots encapsulating UI interactions
+
+.github/
+└── workflows/
+    └── flutter-ci.yml              # CI pipeline for tests and builds
+
+coverage/                           # Generated coverage reports (e.g., lcov.info)
+build/                              # Flutter build output (ignored by VCS)
 ```
 
 ## Technologies & Dependencies
 
 ### Core Dependencies
 
-- **flutter_bloc**: State management using BLoC pattern
-- **injectable** / **get_it**: Dependency injection
-- **dio**: HTTP client for API requests
-- **retrofit**: Type-safe REST client generator
-- **drift**: Reactive database for local storage
-- **flutter_dotenv**: Environment variable management
-- **freezed**: Immutable classes and unions
-- **json_annotation**: JSON serialization
-- **equatable**: Value equality comparisons
+- **flutter_bloc**: State management using BLoC/Cubit with clear separation between complex flows (BLoCs) and simple view‑state (Cubits).
+- **injectable** / **get_it**: Dependency injection container and code generation for wiring repositories, use cases, and state management.
+- **dio**: HTTP client for Todoist API requests with interceptors and robust error handling.
+- **retrofit**: Type-safe REST client generator on top of `dio`, used for the Todoist API interface.
+- **drift** / **drift_flutter**: Reactive SQLite database for offline‑first task, time log, and comment persistence.
+- **flutter_dotenv**: Environment variable management (e.g., Todoist API token, test toggles).
+- **freezed** / **freezed_annotation**: Immutable data classes and sealed unions for entities, models, and states.
+- **json_annotation**: JSON serialization for API models.
+- **equatable**: Value equality for non‑Freezed types and simple value objects.
 
 ### Development Dependencies
 
-- **build_runner**: Code generation
-- **mockito**: Mocking framework for tests
-- **bloc_test**: Testing utilities for BLoC
-- **flutter_lints**: Linting rules
+- **build_runner**: Code generation driver for `injectable`, `freezed`, `json_serializable`, `retrofit`, and `drift`.
+- **injectable_generator** / **retrofit_generator** / **drift_dev** / **json_serializable** / **freezed**: Generators for DI, API clients, database, JSON, and immutable models.
+- **mockito** / **http_mock_adapter**: Mocking frameworks for repositories, APIs, and HTTP interactions.
+- **bloc_test**: High‑level testing utilities for BLoCs and Cubits.
+- **flutter_test** / **integration_test**: Flutter’s testing libraries for unit, widget, and integration tests.
+- **flutter_lints**: Opinionated lint rules to enforce consistent code style and best practices.
 
 ## Code Generation
 
@@ -320,6 +411,49 @@ Using `injectable` and `get_it` provides:
 - Easy mocking for tests
 - Lazy initialization
 - Singleton management
+
+## Development Process & TDD
+
+The implementation of this app followed a **Test‑Driven Development (TDD)** mindset:
+
+- For new features, the typical flow was:
+  1. Define or refine the use cases and entities for the feature.
+  2. Write **unit tests** for the use cases, repositories, and BLoCs/Cubits describing the desired behavior.
+  3. Implement the production code until the tests passed.
+  4. Add **widget tests** for reusable UI components where rendering and interactions mattered.
+  5. Add or extend **integration tests** to cover the end‑to‑end user flows.
+- The test suite was reorganized to:
+  - Keep **widget logic tests** as fast unit tests that do not depend on full widget rendering.
+  - Move **screen‑level tests** into `integration_test/` so they exercise the real app structure and navigation.
+
+This process ensures that business rules are always protected by tests, and that refactors can be performed with confidence.
+
+## CI/CD with GitHub Actions
+
+Continuous Integration is handled by a GitHub Actions workflow located at `.github/workflows/flutter-ci.yml`. It runs automatically on every push to the `master` branch and performs the following steps:
+
+1. **Checkout & Environment Setup**
+   - Checks out the repository.
+   - Sets up Java 17.
+   - Installs Flutter (stable channel) with caching enabled.
+2. **Dependencies & Tests**
+   - Runs `flutter pub get` to install dependencies.
+   - Runs `flutter test` to execute all unit and widget tests (and any integration tests included under `test/`).
+3. **Build Artifacts**
+   - Builds an **Android profile APK** with `flutter build apk --profile`.
+   - Builds an **iOS profile app** with `flutter build ios --profile --no-codesign`.
+   - Archives and uploads the Android APK and iOS app as build artifacts.
+
+This pipeline enforces the testing strategy (tests must pass before builds succeed) and provides ready‑to‑download artifacts for manual QA. Contributors are encouraged to run `flutter test` locally before pushing to keep the CI green.
+
+### Environment Variables & GitHub Secrets
+
+The CI workflow does **not** create a `.env` file automatically. If your CI pipeline needs values that you normally keep in `.env` (for example `TODOIST_API_TOKEN` when running real API integration tests), you must:
+
+- Add the required values as **GitHub Secrets** in the repository settings (e.g., `TODOIST_API_TOKEN`, `USE_REAL_API`, or any other sensitive configuration).
+- Expose those secrets in the workflow as environment variables for the relevant steps, or write them into a temporary `.env` file in a dedicated step before running `flutter test` or build commands.
+
+This keeps secrets out of the codebase and ensures that local development can still rely on a `.env` file while CI uses GitHub Secrets.
 
 ## Troubleshooting
 

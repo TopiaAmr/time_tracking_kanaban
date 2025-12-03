@@ -1,0 +1,59 @@
+name: Flutter CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test-and-build:
+    environment: Testing
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run Flutter tests
+        run: flutter test
+
+      - name: Build Android profile APK
+        run: flutter build apk --profile
+
+      - name: Build iOS profile (no codesign)
+        run: flutter build ios --profile --no-codesign
+
+      - name: Archive iOS build
+        run: |
+          mkdir -p build/ios/archive
+          cd build/ios
+          zip -r archive/Runner-profile.zip iphoneos/Runner.app
+
+      - name: Upload Android profile artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-profile-apk
+          path: build/app/outputs/flutter-apk/app-profile.apk
+
+      - name: Upload iOS profile artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-profile-app
+          path: build/ios/archive/Runner-profile.zip
+
+
