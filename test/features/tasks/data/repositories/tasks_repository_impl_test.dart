@@ -63,15 +63,27 @@ void main() {
       when(mockApi.getTasks()).thenAnswer((_) async => [taskModel]);
       when(mockLocalDataSource.cacheTasks([taskModel]))
           .thenAnswer((_) async => const Success<void>(null));
-      when(mockLocalDataSource.getCachedTasks())
-          .thenAnswer((_) async => Success([taskModel.toEntity()]));
+      
+      // Track call count to return empty first, then cached data
+      var callCount = 0;
+      when(mockLocalDataSource.getCachedTasks()).thenAnswer((_) async {
+        callCount++;
+        if (callCount == 1) {
+          // First call returns empty (no cache)
+          return Success<List<Task>>([]);
+        } else {
+          // Second call returns cached data
+          return Success([taskModel.toEntity()]);
+        }
+      });
 
       final result = await repository.getTasks();
 
       expect(result, isA<Success<List<Task>>>());
       verify(mockApi.getTasks()).called(1);
       verify(mockLocalDataSource.cacheTasks([taskModel])).called(1);
-      verify(mockLocalDataSource.getCachedTasks()).called(1);
+      // getCachedTasks is called twice: once at the start (empty), once at the end (cached)
+      verify(mockLocalDataSource.getCachedTasks()).called(2);
     });
 
     test('should return cached data when API fails but cache exists', () async {

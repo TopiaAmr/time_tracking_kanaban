@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:time_tracking_kanaban/core/widgets/draggable_task_card.dart';
+import 'package:time_tracking_kanaban/core/widgets/task_card.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_state.dart';
+import '../../features/timer/presentation/widgets/timer_widget_test.mocks.dart';
 import 'widget_test_helpers.dart';
 
 void main() {
   group('DraggableTaskCard', () {
+    late MockTimerBloc mockTimerBloc;
+
+    setUp(() {
+      mockTimerBloc = MockTimerBloc();
+      when(mockTimerBloc.stream).thenAnswer((_) => const Stream<TimerState>.empty());
+      when(mockTimerBloc.state).thenReturn(const TimerInitial());
+    });
+
     testWidgets('displays task card', (WidgetTester tester) async {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: Scaffold(
             body: DraggableTaskCard(task: task),
           ),
@@ -26,7 +39,8 @@ void main() {
       final task = TestDataFactory.createTask(content: 'Draggable Task');
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: DraggableTaskCard(task: task),
         ),
       );
@@ -39,7 +53,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: DraggableTaskCard(
             task: task,
             onTap: () {
@@ -49,7 +64,13 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(InkWell));
+      await tester.pumpAndSettle();
+      // Use find.first to get the first InkWell (the one with onTap callback)
+      final inkWellFinder = find.descendant(
+        of: find.byType(TaskCard),
+        matching: find.byType(InkWell),
+      );
+      await tester.tap(inkWellFinder.first);
       expect(tapped, isTrue);
     });
 
@@ -57,7 +78,8 @@ void main() {
       final task = TestDataFactory.createTask(id: 'task123');
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: DraggableTaskCard(task: task),
         ),
       );
@@ -73,7 +95,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: DraggableTaskCard(task: task),
         ),
       );
@@ -90,7 +113,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: DraggableTaskCard(task: task),
         ),
       );
@@ -108,7 +132,8 @@ void main() {
       final tags = ['urgent', 'important'];
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: DraggableTaskCard(
             task: task,
             tags: tags,
@@ -125,7 +150,8 @@ void main() {
       final assignees = ['Alice', 'Bob'];
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: Scaffold(
             body: DraggableTaskCard(
               task: task,
@@ -144,7 +170,8 @@ void main() {
       final dueDate = DateTime(2024, 1, 20);
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: DraggableTaskCard(
             task: task,
             dueDate: dueDate,
@@ -159,7 +186,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: DraggableTaskCard(
             task: task,
             commentCount: 5,

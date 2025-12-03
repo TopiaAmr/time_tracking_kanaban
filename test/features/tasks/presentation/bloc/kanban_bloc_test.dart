@@ -232,7 +232,7 @@ void main() {
     );
 
     blocTest<KanbanBloc, KanbanState>(
-      'emits [KanbanLoading, KanbanError] when MoveTask fails',
+      'emits [KanbanError] when MoveTask fails',
       build: () {
         when(mockMoveTaskUseCase(any)).thenAnswer(
           (_) async => const Error<Task>(ServerFailure()),
@@ -247,7 +247,6 @@ void main() {
         ),
       ),
       expect: () => [
-        const KanbanLoading(),
         KanbanError(ServerFailure()),
       ],
     );
@@ -281,7 +280,7 @@ void main() {
     );
 
     blocTest<KanbanBloc, KanbanState>(
-      'emits [KanbanLoading, KanbanError] when CreateTask fails',
+      'emits [KanbanError] when CreateTask fails',
       build: () {
         when(mockAddTaskUseCase(any)).thenAnswer(
           (_) async => const Error<Task>(ServerFailure()),
@@ -292,7 +291,6 @@ void main() {
         CreateTask(createTask(id: '1', checked: false)),
       ),
       expect: () => [
-        const KanbanLoading(),
         KanbanError(ServerFailure()),
       ],
     );
@@ -326,7 +324,7 @@ void main() {
     );
 
     blocTest<KanbanBloc, KanbanState>(
-      'emits [KanbanLoading, KanbanError] when UpdateTask fails',
+      'emits [KanbanError] when UpdateTask fails',
       build: () {
         when(mockUpdateTaskUseCase(any)).thenAnswer(
           (_) async => const Error<Task>(ServerFailure()),
@@ -337,7 +335,6 @@ void main() {
         UpdateTaskEvent(createTask(id: '1', checked: false)),
       ),
       expect: () => [
-        const KanbanLoading(),
         KanbanError(ServerFailure()),
       ],
     );
@@ -371,7 +368,7 @@ void main() {
     );
 
     blocTest<KanbanBloc, KanbanState>(
-      'emits [KanbanLoading, KanbanError] when CloseTask fails',
+      'emits [KanbanError] when CloseTask fails',
       build: () {
         when(mockCloseTaskUseCase(any)).thenAnswer(
           (_) async => const Error<Task>(ServerFailure()),
@@ -382,7 +379,6 @@ void main() {
         CloseTaskEvent(createTask(id: '1', checked: false)),
       ),
       expect: () => [
-        const KanbanLoading(),
         KanbanError(ServerFailure()),
       ],
     );

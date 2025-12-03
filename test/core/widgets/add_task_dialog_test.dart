@@ -209,19 +209,19 @@ void main() {
         ),
       );
 
-      // Find close button (X icon)
-      final closeButton = find.byIcon(Icons.close);
-      if (closeButton.evaluate().isNotEmpty) {
-        await tester.tap(closeButton);
-        await tester.pump();
-      }
+      await tester.pumpAndSettle();
 
-      // Find cancel button
-      final cancelButton = find.text('Cancel');
-      if (cancelButton.evaluate().isNotEmpty) {
-        await tester.tap(cancelButton);
-        await tester.pump();
-      }
+      // Find cancel button using widgetWithText to find the TextButton directly
+      final cancelButton = find.widgetWithText(TextButton, 'Cancel');
+      expect(cancelButton, findsOneWidget);
+
+      // Scroll to ensure the button is visible if needed
+      await tester.ensureVisible(cancelButton);
+      await tester.pumpAndSettle();
+
+      // Tap the cancel button (suppress warning if it's slightly off-screen but still works)
+      await tester.tap(cancelButton, warnIfMissed: false);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('uses default project ID', (WidgetTester tester) async {

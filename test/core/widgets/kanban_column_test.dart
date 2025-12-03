@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:time_tracking_kanaban/core/widgets/kanban_column.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/section.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_state.dart';
+import '../../features/timer/presentation/widgets/timer_widget_test.mocks.dart';
 import 'widget_test_helpers.dart';
 
 void main() {
@@ -20,9 +23,18 @@ void main() {
   );
 
   group('KanbanColumn', () {
+    late MockTimerBloc mockTimerBloc;
+
+    setUp(() {
+      mockTimerBloc = MockTimerBloc();
+      when(mockTimerBloc.stream).thenAnswer((_) => const Stream<TimerState>.empty());
+      when(mockTimerBloc.state).thenReturn(const TimerInitial());
+    });
+
     testWidgets('displays column title', (WidgetTester tester) async {
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: KanbanColumn(
             section: testSection,
             tasks: const [],
@@ -37,7 +49,8 @@ void main() {
       final tasks = TestDataFactory.createTaskList(count: 3);
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: KanbanColumn(
             section: testSection,
             tasks: tasks,
@@ -51,7 +64,8 @@ void main() {
 
     testWidgets('displays empty state when no tasks', (WidgetTester tester) async {
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: Scaffold(
             body: KanbanColumn(
               section: testSection,
@@ -70,7 +84,8 @@ void main() {
       final tasks = TestDataFactory.createTaskList(count: 2);
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: KanbanColumn(
             section: testSection,
             tasks: tasks,
@@ -88,7 +103,8 @@ void main() {
       final tasks = TestDataFactory.createTaskList(count: 1);
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: Scaffold(
             body: KanbanColumn(
               section: testSection,
@@ -114,7 +130,8 @@ void main() {
     testWidgets('displays Add Task button when onAddTask is provided',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: KanbanColumn(
             section: testSection,
             tasks: [],
@@ -132,7 +149,8 @@ void main() {
       var addTaskCalled = false;
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: KanbanColumn(
             section: testSection,
             tasks: [],
@@ -143,7 +161,9 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Add Task'));
+      await tester.pumpAndSettle();
+      // The Add Task button is an IconButton with Icons.add, not text
+      await tester.tap(find.byIcon(Icons.add));
       expect(addTaskCalled, isTrue);
     });
 
@@ -152,7 +172,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: KanbanColumn(
             section: testSection,
             tasks: [],
@@ -181,7 +202,8 @@ void main() {
 
     testWidgets('adapts width for mobile screen', (WidgetTester tester) async {
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: KanbanColumn(
             section: testSection,
             tasks: [],
@@ -196,7 +218,8 @@ void main() {
 
     testWidgets('adapts width for desktop screen', (WidgetTester tester) async {
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: KanbanColumn(
             section: testSection,
             tasks: [],

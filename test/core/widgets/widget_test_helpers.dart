@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:time_tracking_kanaban/core/l10n/l10n_cubit.dart';
 import 'package:time_tracking_kanaban/core/theme/app_theme.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/time_log.dart';
 import 'package:time_tracking_kanaban/features/timer/domain/entities/task_timer_summary.dart';
+import 'package:time_tracking_kanaban/features/timer/domain/entities/task_history_detail.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_bloc.dart';
 import 'package:time_tracking_kanaban/l10n/app_localizations.dart';
 
 /// Helper class for widget testing utilities.
@@ -76,6 +79,46 @@ class WidgetTestHelpers {
               child: wrapped,
             )
           : wrapped,
+    );
+  }
+
+  /// Wraps a widget with MaterialApp and common providers (TimerBloc, L10nCubit).
+  /// This is useful for testing widgets that depend on these providers.
+  static Widget wrapWithMaterialAppAndCommonProviders({
+    required Widget child,
+    TimerBloc? timerBloc,
+    L10nCubit? l10nCubit,
+    ThemeData? theme,
+    Locale? locale,
+    Size? screenSize,
+  }) {
+    final List<BlocProvider> providers = [];
+
+    // Add TimerBloc provider (required for TaskCard)
+    if (timerBloc != null) {
+      providers.add(BlocProvider<TimerBloc>.value(value: timerBloc));
+    }
+
+    // Add L10nCubit provider (required for AppHeader and language switcher)
+    if (l10nCubit != null) {
+      providers.add(BlocProvider<L10nCubit>.value(value: l10nCubit));
+    }
+
+    if (providers.isEmpty) {
+      return wrapWithMaterialApp(
+        child: child,
+        theme: theme,
+        locale: locale,
+        screenSize: screenSize,
+      );
+    }
+
+    return wrapWithMaterialAppAndBlocs(
+      child: child,
+      blocProviders: providers,
+      theme: theme,
+      locale: locale,
+      screenSize: screenSize,
     );
   }
 
@@ -152,6 +195,23 @@ class TestDataFactory {
       taskTitle: taskTitle ?? 'Test Task',
       totalTrackedSeconds: totalTrackedSeconds ?? 3600,
       hasActiveTimer: hasActiveTimer ?? false,
+    );
+  }
+
+  /// Creates a test TaskHistoryDetail with default or custom values.
+  static TaskHistoryDetail createTaskHistoryDetail({
+    String? taskId,
+    String? taskTitle,
+    int? totalTrackedSeconds,
+    bool? hasActiveTimer,
+    List<TimeLog>? timeLogs,
+  }) {
+    return TaskHistoryDetail(
+      taskId: taskId ?? 'task1',
+      taskTitle: taskTitle ?? 'Test Task',
+      totalTrackedSeconds: totalTrackedSeconds ?? 3600,
+      hasActiveTimer: hasActiveTimer ?? false,
+      timeLogs: timeLogs ?? [createTimeLog(taskId: taskId ?? 'task1')],
     );
   }
 

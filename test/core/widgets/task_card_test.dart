@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:time_tracking_kanaban/core/widgets/task_card.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_state.dart';
+import '../../features/timer/presentation/widgets/timer_widget_test.mocks.dart';
 import 'widget_test_helpers.dart';
 
 void main() {
   group('TaskCard', () {
+    late MockTimerBloc mockTimerBloc;
+
+    setUp(() {
+      mockTimerBloc = MockTimerBloc();
+      when(mockTimerBloc.stream).thenAnswer((_) => const Stream<TimerState>.empty());
+      when(mockTimerBloc.state).thenReturn(const TimerInitial());
+    });
+
     testWidgets('displays task content', (WidgetTester tester) async {
       final task = TestDataFactory.createTask(
         content: 'Test Task Title',
       );
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(task: task),
         ),
       );
@@ -27,7 +39,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(task: task),
         ),
       );
@@ -40,11 +53,13 @@ void main() {
       final tags = ['urgent', 'important', 'frontend'];
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(task: task, tags: tags),
         ),
       );
 
+      await tester.pumpAndSettle();
       expect(find.text('urgent'), findsOneWidget);
       expect(find.text('important'), findsOneWidget);
       expect(find.text('frontend'), findsOneWidget);
@@ -56,7 +71,8 @@ void main() {
       final assignees = ['John', 'Jane'];
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: Scaffold(
             body: TaskCard(task: task, assignees: assignees),
           ),
@@ -74,11 +90,13 @@ void main() {
       final dueDate = DateTime(2024, 1, 15);
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(task: task, dueDate: dueDate),
         ),
       );
 
+      await tester.pumpAndSettle();
       expect(find.byIcon(Icons.calendar_today), findsOneWidget);
     });
 
@@ -87,11 +105,13 @@ void main() {
       final task = TestDataFactory.createTask(noteCount: 5);
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(task: task, commentCount: 5),
         ),
       );
 
+      await tester.pumpAndSettle();
       expect(find.byIcon(Icons.comment_outlined), findsOneWidget);
       expect(find.text('5'), findsOneWidget);
     });
@@ -101,11 +121,13 @@ void main() {
       final task = TestDataFactory.createTask(noteCount: 0);
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(task: task, commentCount: 0),
         ),
       );
 
+      await tester.pumpAndSettle();
       expect(find.byIcon(Icons.comment_outlined), findsNothing);
     });
 
@@ -115,7 +137,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(
             task: task,
             onTap: () {
@@ -125,7 +148,13 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(InkWell));
+      await tester.pumpAndSettle();
+      // Use find.first to get the first InkWell (the one with onTap callback)
+      final inkWellFinder = find.descendant(
+        of: find.byType(TaskCard),
+        matching: find.byType(InkWell),
+      );
+      await tester.tap(inkWellFinder.first);
       expect(tapped, isTrue);
     });
 
@@ -135,7 +164,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(
             task: task,
             onLongPress: () {
@@ -145,7 +175,13 @@ void main() {
         ),
       );
 
-      await tester.longPress(find.byType(InkWell));
+      await tester.pumpAndSettle();
+      // Use find.first to get the first InkWell (the one with onLongPress callback)
+      final inkWellFinder = find.descendant(
+        of: find.byType(TaskCard),
+        matching: find.byType(InkWell),
+      );
+      await tester.longPress(inkWellFinder.first);
       expect(longPressed, isTrue);
     });
 
@@ -154,7 +190,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(task: task),
           screenSize: WidgetTestHelpers.mobileSize,
         ),
@@ -169,7 +206,8 @@ void main() {
       final task = TestDataFactory.createTask();
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: TaskCard(task: task),
           screenSize: WidgetTestHelpers.desktopSize,
         ),
@@ -189,7 +227,8 @@ void main() {
       final dueDate = DateTime(2024, 1, 20);
 
       await tester.pumpWidget(
-        WidgetTestHelpers.wrapWithMaterialApp(
+        WidgetTestHelpers.wrapWithMaterialAppAndCommonProviders(
+          timerBloc: mockTimerBloc,
           child: Scaffold(
             body: TaskCard(
               task: task,
