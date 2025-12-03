@@ -48,6 +48,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<PauseTimer>(_onPauseTimer);
     on<ResumeTimer>(_onResumeTimer);
     on<StopTimer>(_onStopTimer);
+    on<StopTimerForTask>(_onStopTimerForTask);
     on<TimerTick>(_onTimerTick);
     on<LoadActiveTimer>(_onLoadActiveTimer);
   }
@@ -123,6 +124,36 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     final timeLog = (result as Success<TimeLog>).value;
     final elapsedSeconds = _calculateElapsedSeconds(timeLog);
     emit(TimerStopped(timeLog: timeLog, elapsedSeconds: elapsedSeconds));
+  }
+
+  /// Handles the [StopTimerForTask] event.
+  ///
+  /// Only stops the timer if it's currently running for the specified task.
+  /// This is used when a task is completed to auto-stop its timer.
+  Future<void> _onStopTimerForTask(
+    StopTimerForTask event,
+    Emitter<TimerState> emit,
+  ) async {
+    final currentState = state;
+    
+    // Only stop if timer is running for this specific task
+    if (currentState is TimerRunning && currentState.timeLog.taskId == event.taskId) {
+      // Stop the ticker
+      await _tickerSubscription?.cancel();
+      _tickerSubscription = null;
+
+      final result = await _stopTimerUseCase(NoParams());
+
+      if (result is Error<TimeLog>) {
+        emit(TimerError(result.failure));
+        return;
+      }
+
+      final timeLog = (result as Success<TimeLog>).value;
+      final elapsedSeconds = _calculateElapsedSeconds(timeLog);
+      emit(TimerStopped(timeLog: timeLog, elapsedSeconds: elapsedSeconds));
+    }
+    // If timer is not running for this task, do nothing
   }
 
   /// Handles the [TimerTick] event.

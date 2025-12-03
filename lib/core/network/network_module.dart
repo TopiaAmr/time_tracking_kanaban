@@ -44,7 +44,7 @@ abstract class NetworkModule {
     );
 
     // Add interceptor to handle Todoist API v1 paginated responses
-    dio.interceptors.add(TodoistResponseInterceptor());
+    // dio.interceptors.add(TodoistResponseInterceptor());
 
     return dio;
   }

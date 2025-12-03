@@ -164,4 +164,37 @@ class TaskDetailRobot {
       await tester.pumpAndSettle();
     }
   }
+
+  /// Taps the complete/close task button.
+  Future<void> tapCompleteTask() async {
+    // Look for check/done icon button
+    final completeButton = find.byIcon(Icons.check_circle_outline);
+    if (completeButton.evaluate().isNotEmpty) {
+      await tester.tap(completeButton.first);
+      await tester.pumpAndSettle();
+    } else {
+      // Try finding by text
+      final completeText = find.text('Complete');
+      if (completeText.evaluate().isNotEmpty) {
+        await tester.tap(completeText.first);
+        await tester.pumpAndSettle();
+      } else {
+        // Try finding done icon
+        final doneButton = find.byIcon(Icons.done);
+        if (doneButton.evaluate().isNotEmpty) {
+          await tester.tap(doneButton.first);
+          await tester.pumpAndSettle();
+        }
+      }
+    }
+  }
+
+  /// Confirms task completion in dialog if shown.
+  Future<void> confirmCompleteTask() async {
+    final confirmButton = find.text('Complete');
+    if (confirmButton.evaluate().isNotEmpty) {
+      await tester.tap(confirmButton.last);
+      await tester.pumpAndSettle();
+    }
+  }
 }

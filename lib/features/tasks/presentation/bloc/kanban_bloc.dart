@@ -12,6 +12,8 @@ import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_section
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/move_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/update_task_usecase.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_bloc.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_event.dart';
 import 'kanban_event.dart';
 import 'kanban_state.dart';
 
@@ -43,6 +45,9 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
   /// Use case for getting all sections.
   final GetSections _getSections;
 
+  /// Timer BLoC for auto-stopping timer when task is completed.
+  final TimerBloc _timerBloc;
+
   /// Creates a [KanbanBloc] with the required use cases.
   KanbanBloc(
     this._getTasks,
@@ -52,6 +57,7 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     this._closeTask,
     this._deleteTask,
     this._getSections,
+    this._timerBloc,
   ) : super(const KanbanInitial()) {
     on<LoadKanbanTasks>(_onLoadKanbanTasks);
     on<MoveTaskEvent>(_onMoveTask);
@@ -283,6 +289,9 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     CloseTaskEvent event,
     Emitter<KanbanState> emit,
   ) async {
+    // Auto-stop timer if running for this task (per spec requirement)
+    _timerBloc.add(StopTimerForTask(event.task.id));
+
     // Don't emit loading state - update optimistically
     final result = await _closeTask(CloseTaskParams(event.task));
 

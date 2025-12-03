@@ -314,4 +314,116 @@ void main() {
       }
     });
   });
+
+  group('Flow 2.4: Auto-Stop Timer on Task Completion', () {
+    testWidgets('should auto-stop timer when task is completed', (tester) async {
+      kanbanRobot = KanbanRobot(tester);
+      taskDetailRobot = TaskDetailRobot(tester);
+      timerRobot = TimerRobot(tester);
+
+      await IntegrationTestHelper.pumpApp(tester);
+      await kanbanRobot.waitForLoad();
+
+      final taskCards = find.byType(Card);
+      if (taskCards.evaluate().isNotEmpty) {
+        // Open a task
+        await tester.tap(taskCards.first);
+        await tester.pumpAndSettle();
+
+        // Scroll to timer section and start timer
+        await taskDetailRobot.scrollToTimer();
+        await timerRobot.startTimer();
+        await timerRobot.verifyTimerRunning();
+
+        // Wait a bit for timer to accumulate time
+        await timerRobot.waitForTimerTick(const Duration(seconds: 2));
+
+        // Complete the task
+        await taskDetailRobot.tapCompleteTask();
+        await taskDetailRobot.confirmCompleteTask();
+
+        // Timer should be stopped automatically
+        // The pause button should no longer be visible
+        await timerRobot.verifyTimerStopped();
+      }
+    });
+
+    testWidgets('should preserve elapsed time when timer auto-stops on completion', (tester) async {
+      kanbanRobot = KanbanRobot(tester);
+      taskDetailRobot = TaskDetailRobot(tester);
+      timerRobot = TimerRobot(tester);
+
+      await IntegrationTestHelper.pumpApp(tester);
+      await kanbanRobot.waitForLoad();
+
+      final taskCards = find.byType(Card);
+      if (taskCards.evaluate().isNotEmpty) {
+        // Open a task
+        await tester.tap(taskCards.first);
+        await tester.pumpAndSettle();
+
+        // Scroll to timer section and start timer
+        await taskDetailRobot.scrollToTimer();
+        await timerRobot.startTimer();
+
+        // Wait for timer to accumulate some time
+        await timerRobot.waitForTimerTick(const Duration(seconds: 3));
+
+        // Get the elapsed time before completion
+        final elapsedTimeBefore = await timerRobot.getCurrentDisplayedTime();
+
+        // Complete the task
+        await taskDetailRobot.tapCompleteTask();
+        await taskDetailRobot.confirmCompleteTask();
+
+        // Verify timer stopped but time is preserved (not reset to 00:00)
+        if (elapsedTimeBefore != null && elapsedTimeBefore != '00:00') {
+          await timerRobot.verifyElapsedTimeGreaterThanZero();
+        }
+      }
+    });
+
+    testWidgets('should not affect timer of other tasks when completing a task', (tester) async {
+      kanbanRobot = KanbanRobot(tester);
+      taskDetailRobot = TaskDetailRobot(tester);
+      timerRobot = TimerRobot(tester);
+
+      await IntegrationTestHelper.pumpApp(tester);
+      await kanbanRobot.waitForLoad();
+
+      final taskCards = find.byType(Card);
+      if (taskCards.evaluate().length >= 2) {
+        // Start timer on first task
+        await tester.tap(taskCards.first);
+        await tester.pumpAndSettle();
+        await taskDetailRobot.scrollToTimer();
+        await timerRobot.startTimer();
+        await timerRobot.verifyTimerRunning();
+
+        // Go back to Kanban
+        await taskDetailRobot.tapBack();
+        await kanbanRobot.waitForLoad();
+
+        // Open second task (which has no timer running)
+        await tester.tap(taskCards.at(1));
+        await tester.pumpAndSettle();
+
+        // Complete the second task
+        await taskDetailRobot.tapCompleteTask();
+        await taskDetailRobot.confirmCompleteTask();
+
+        // Go back to Kanban
+        await taskDetailRobot.tapBack();
+        await kanbanRobot.waitForLoad();
+
+        // Open first task again
+        await tester.tap(taskCards.first);
+        await tester.pumpAndSettle();
+        await taskDetailRobot.scrollToTimer();
+
+        // Timer on first task should still be running
+        await timerRobot.verifyTimerRunning();
+      }
+    });
+  });
 }

@@ -40,6 +40,20 @@ class StopTimer extends TimerEvent {
   const StopTimer();
 }
 
+/// Event to stop the timer only if it's running for a specific task.
+///
+/// This is used when a task is completed/closed to automatically stop
+/// its timer without affecting timers for other tasks.
+class StopTimerForTask extends TimerEvent {
+  /// The ID of the task to stop the timer for.
+  final String taskId;
+
+  const StopTimerForTask(this.taskId);
+
+  @override
+  List<Object?> get props => [taskId];
+}
+
 /// Internal event for timer tick updates.
 ///
 /// This event is triggered by the Ticker to update the elapsed time

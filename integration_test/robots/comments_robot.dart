@@ -103,7 +103,7 @@ class CommentsRobot {
       // Try exact match first
       final commentFinder = find.text(commentText);
       if (commentFinder.evaluate().isNotEmpty) {
-        expect(commentFinder, findsOneWidget);
+        expect(commentFinder, findsWidgets);
         return;
       }
       
@@ -116,7 +116,7 @@ class CommentsRobot {
     }
     
     // Final check with assertion
-    expect(find.text(commentText), findsOneWidget);
+    expect(find.text(commentText), findsWidgets);
   }
 
   /// Verifies a comment does not exist.

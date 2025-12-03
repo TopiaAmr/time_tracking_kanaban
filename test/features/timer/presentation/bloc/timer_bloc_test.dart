@@ -255,5 +255,63 @@ void main() {
       act: (bloc) => bloc.add(const TimerTick()),
       expect: () => [],
     );
+
+    blocTest<TimerBloc, TimerState>(
+      'emits TimerStopped when StopTimerForTask is called for running task',
+      build: () {
+        final stoppedTimeLog = createTimeLog(
+          id: 'timer1',
+          taskId: 'task1',
+          startTime: dummyDateTime,
+          endTime: dummyDateTime.add(const Duration(seconds: 60)),
+        );
+        when(
+          mockStopTimerUseCase(any),
+        ).thenAnswer((_) async => Success(stoppedTimeLog));
+        return timerBloc;
+      },
+      seed: () => TimerRunning(
+        timeLog: createTimeLog(
+          id: 'timer1',
+          taskId: 'task1',
+          startTime: dummyDateTime,
+        ),
+        elapsedSeconds: 60,
+      ),
+      act: (bloc) => bloc.add(const StopTimerForTask('task1')),
+      expect: () => [isA<TimerStopped>()],
+      verify: (_) {
+        verify(mockStopTimerUseCase(any)).called(1);
+      },
+    );
+
+    blocTest<TimerBloc, TimerState>(
+      'does not stop timer when StopTimerForTask is called for different task',
+      build: () => timerBloc,
+      seed: () => TimerRunning(
+        timeLog: createTimeLog(
+          id: 'timer1',
+          taskId: 'task1',
+          startTime: dummyDateTime,
+        ),
+        elapsedSeconds: 60,
+      ),
+      act: (bloc) => bloc.add(const StopTimerForTask('task2')),
+      expect: () => [],
+      verify: (_) {
+        verifyNever(mockStopTimerUseCase(any));
+      },
+    );
+
+    blocTest<TimerBloc, TimerState>(
+      'does nothing when StopTimerForTask is called and no timer is running',
+      build: () => timerBloc,
+      seed: () => const TimerInitial(),
+      act: (bloc) => bloc.add(const StopTimerForTask('task1')),
+      expect: () => [],
+      verify: (_) {
+        verifyNever(mockStopTimerUseCase(any));
+      },
+    );
   });
 }

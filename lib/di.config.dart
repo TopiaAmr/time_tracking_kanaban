@@ -191,17 +191,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i76.ConnectivityService>(),
       ),
     );
-    gh.lazySingleton<_i742.KanbanBloc>(
-      () => _i742.KanbanBloc(
-        gh<_i951.GetTasksUseCase>(),
-        gh<_i584.MoveTaskUseCase>(),
-        gh<_i923.AddTaskUseCase>(),
-        gh<_i878.UpdateTaskUseCase>(),
-        gh<_i460.CloseTaskUseCase>(),
-        gh<_i821.DeleteTaskUseCase>(),
-        gh<_i362.GetSections>(),
-      ),
-    );
     gh.lazySingleton<_i486.TimerBloc>(
       () => _i486.TimerBloc(
         gh<_i647.StartTimerUseCase>(),
@@ -222,6 +211,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i137.UpdateComment>(
       () => _i137.UpdateComment(gh<_i861.CommentsRepository>()),
+    );
+    gh.lazySingleton<_i742.KanbanBloc>(
+      () => _i742.KanbanBloc(
+        gh<_i951.GetTasksUseCase>(),
+        gh<_i584.MoveTaskUseCase>(),
+        gh<_i923.AddTaskUseCase>(),
+        gh<_i878.UpdateTaskUseCase>(),
+        gh<_i460.CloseTaskUseCase>(),
+        gh<_i821.DeleteTaskUseCase>(),
+        gh<_i362.GetSections>(),
+        gh<_i486.TimerBloc>(),
+      ),
     );
     gh.factory<_i313.CommentsCubit>(
       () => _i313.CommentsCubit(

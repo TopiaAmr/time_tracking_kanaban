@@ -14,6 +14,7 @@ import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_u
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/move_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/update_task_usecase.dart';
 import 'package:time_tracking_kanaban/features/tasks/presentation/bloc/kanban_bloc.dart';
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_bloc.dart';
 import 'package:time_tracking_kanaban/features/tasks/presentation/bloc/kanban_event.dart';
 import 'package:time_tracking_kanaban/features/tasks/presentation/bloc/kanban_state.dart';
 
@@ -28,6 +29,7 @@ import 'kanban_bloc_test.mocks.dart';
   CloseTaskUseCase,
   DeleteTaskUseCase,
   GetSections,
+  TimerBloc,
 ])
 void main() {
   late KanbanBloc kanbanBloc;
@@ -38,6 +40,7 @@ void main() {
   late MockCloseTaskUseCase mockCloseTaskUseCase;
   late MockDeleteTaskUseCase mockDeleteTaskUseCase;
   late MockGetSections mockGetSections;
+  late MockTimerBloc mockTimerBloc;
 
   final dummyDateTime = DateTime(2024, 1, 1);
 
@@ -96,6 +99,7 @@ void main() {
     mockCloseTaskUseCase = MockCloseTaskUseCase();
     mockDeleteTaskUseCase = MockDeleteTaskUseCase();
     mockGetSections = MockGetSections();
+    mockTimerBloc = MockTimerBloc();
 
     kanbanBloc = KanbanBloc(
       mockGetTasksUseCase,
@@ -105,6 +109,7 @@ void main() {
       mockCloseTaskUseCase,
       mockDeleteTaskUseCase,
       mockGetSections,
+      mockTimerBloc,
     );
   });
 
@@ -381,6 +386,30 @@ void main() {
       expect: () => [
         KanbanError(ServerFailure()),
       ],
+    );
+
+    blocTest<KanbanBloc, KanbanState>(
+      'dispatches StopTimerForTask to TimerBloc when closing a task',
+      build: () {
+        final closedTask = createTask(id: 'task-123', checked: true);
+        when(mockCloseTaskUseCase(any)).thenAnswer(
+          (_) async => Success(closedTask),
+        );
+        when(mockGetTasksUseCase(any)).thenAnswer(
+          (_) async => Success([closedTask]),
+        );
+        when(mockGetSections(any)).thenAnswer(
+          (_) async => const Success<List<Section>>([]),
+        );
+        return kanbanBloc;
+      },
+      act: (bloc) => bloc.add(
+        CloseTaskEvent(createTask(id: 'task-123', checked: false)),
+      ),
+      verify: (_) {
+        // Verify that StopTimerForTask was dispatched to TimerBloc
+        verify(mockTimerBloc.add(any)).called(1);
+      },
     );
   });
 }

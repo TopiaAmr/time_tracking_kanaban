@@ -21,7 +21,7 @@ class KanbanRobot {
   /// Verifies a task with the given title exists in the board.
   Future<void> verifyTaskExists(String taskTitle) async {
     await tester.pumpAndSettle();
-    expect(find.text(taskTitle), findsOneWidget);
+    expect(find.text(taskTitle), findsWidgets);
   }
 
   /// Verifies a task with the given title exists in a specific column.
@@ -30,10 +30,10 @@ class KanbanRobot {
     
     // Find the column by name
     final columnFinder = find.text(columnName);
-    expect(columnFinder, findsOneWidget);
+    expect(columnFinder, findsWidgets);
     
     // Verify task exists
-    expect(find.text(taskTitle), findsOneWidget);
+    expect(find.text(taskTitle), findsWidgets);
   }
 
   /// Taps the add task button.

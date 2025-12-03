@@ -3,32 +3,39 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i5;
 
+import 'package:flutter_bloc/flutter_bloc.dart' as _i19;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
-import 'package:time_tracking_kanaban/core/usecases/usecase.dart' as _i7;
-import 'package:time_tracking_kanaban/core/utils/result.dart' as _i5;
+import 'package:mockito/src/dummies.dart' as _i9;
+import 'package:time_tracking_kanaban/core/usecases/usecase.dart' as _i8;
+import 'package:time_tracking_kanaban/core/utils/result.dart' as _i6;
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/section.dart'
-    as _i15;
+    as _i16;
 import 'package:time_tracking_kanaban/features/tasks/domain/entities/task.dart'
-    as _i6;
+    as _i7;
 import 'package:time_tracking_kanaban/features/tasks/domain/repository/tasks_repository.dart'
     as _i2;
 import 'package:time_tracking_kanaban/features/tasks/domain/usecases/add_task_usecase.dart'
-    as _i10;
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/close_task_usecase.dart'
-    as _i12;
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/delete_task_usecase.dart'
-    as _i13;
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_sections_usecase.dart'
-    as _i14;
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart'
-    as _i3;
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/move_task_usecase.dart'
-    as _i9;
-import 'package:time_tracking_kanaban/features/tasks/domain/usecases/update_task_usecase.dart'
     as _i11;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/close_task_usecase.dart'
+    as _i13;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/delete_task_usecase.dart'
+    as _i14;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_sections_usecase.dart'
+    as _i15;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/get_tasks_usecase.dart'
+    as _i4;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/move_task_usecase.dart'
+    as _i10;
+import 'package:time_tracking_kanaban/features/tasks/domain/usecases/update_task_usecase.dart'
+    as _i12;
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_bloc.dart'
+    as _i17;
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_event.dart'
+    as _i18;
+import 'package:time_tracking_kanaban/features/timer/presentation/bloc/timer_state.dart'
+    as _i3;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -51,10 +58,15 @@ class _FakeTasksRepository_0 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
+class _FakeTimerState_1 extends _i1.SmartFake implements _i3.TimerState {
+  _FakeTimerState_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [GetTasksUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetTasksUseCase extends _i1.Mock implements _i3.GetTasksUseCase {
+class MockGetTasksUseCase extends _i1.Mock implements _i4.GetTasksUseCase {
   MockGetTasksUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -71,23 +83,23 @@ class MockGetTasksUseCase extends _i1.Mock implements _i3.GetTasksUseCase {
           as _i2.TasksRepository);
 
   @override
-  _i4.Future<_i5.Result<List<_i6.Task>>> call(_i7.NoParams? params) =>
+  _i5.Future<_i6.Result<List<_i7.Task>>> call(_i8.NoParams? params) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i4.Future<_i5.Result<List<_i6.Task>>>.value(
-              _i8.dummyValue<_i5.Result<List<_i6.Task>>>(
+            returnValue: _i5.Future<_i6.Result<List<_i7.Task>>>.value(
+              _i9.dummyValue<_i6.Result<List<_i7.Task>>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i4.Future<_i5.Result<List<_i6.Task>>>);
+          as _i5.Future<_i6.Result<List<_i7.Task>>>);
 }
 
 /// A class which mocks [MoveTaskUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockMoveTaskUseCase extends _i1.Mock implements _i9.MoveTaskUseCase {
+class MockMoveTaskUseCase extends _i1.Mock implements _i10.MoveTaskUseCase {
   MockMoveTaskUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -104,23 +116,23 @@ class MockMoveTaskUseCase extends _i1.Mock implements _i9.MoveTaskUseCase {
           as _i2.TasksRepository);
 
   @override
-  _i4.Future<_i5.Result<_i6.Task>> call(_i9.MoveTaskParams? params) =>
+  _i5.Future<_i6.Result<_i7.Task>> call(_i10.MoveTaskParams? params) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i4.Future<_i5.Result<_i6.Task>>.value(
-              _i8.dummyValue<_i5.Result<_i6.Task>>(
+            returnValue: _i5.Future<_i6.Result<_i7.Task>>.value(
+              _i9.dummyValue<_i6.Result<_i7.Task>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i4.Future<_i5.Result<_i6.Task>>);
+          as _i5.Future<_i6.Result<_i7.Task>>);
 }
 
 /// A class which mocks [AddTaskUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAddTaskUseCase extends _i1.Mock implements _i10.AddTaskUseCase {
+class MockAddTaskUseCase extends _i1.Mock implements _i11.AddTaskUseCase {
   MockAddTaskUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -137,23 +149,23 @@ class MockAddTaskUseCase extends _i1.Mock implements _i10.AddTaskUseCase {
           as _i2.TasksRepository);
 
   @override
-  _i4.Future<_i5.Result<_i6.Task>> call(_i10.AddTaskParams? params) =>
+  _i5.Future<_i6.Result<_i7.Task>> call(_i11.AddTaskParams? params) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i4.Future<_i5.Result<_i6.Task>>.value(
-              _i8.dummyValue<_i5.Result<_i6.Task>>(
+            returnValue: _i5.Future<_i6.Result<_i7.Task>>.value(
+              _i9.dummyValue<_i6.Result<_i7.Task>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i4.Future<_i5.Result<_i6.Task>>);
+          as _i5.Future<_i6.Result<_i7.Task>>);
 }
 
 /// A class which mocks [UpdateTaskUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockUpdateTaskUseCase extends _i1.Mock implements _i11.UpdateTaskUseCase {
+class MockUpdateTaskUseCase extends _i1.Mock implements _i12.UpdateTaskUseCase {
   MockUpdateTaskUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -170,23 +182,23 @@ class MockUpdateTaskUseCase extends _i1.Mock implements _i11.UpdateTaskUseCase {
           as _i2.TasksRepository);
 
   @override
-  _i4.Future<_i5.Result<_i6.Task>> call(_i11.UpdateTaskParams? params) =>
+  _i5.Future<_i6.Result<_i7.Task>> call(_i12.UpdateTaskParams? params) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i4.Future<_i5.Result<_i6.Task>>.value(
-              _i8.dummyValue<_i5.Result<_i6.Task>>(
+            returnValue: _i5.Future<_i6.Result<_i7.Task>>.value(
+              _i9.dummyValue<_i6.Result<_i7.Task>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i4.Future<_i5.Result<_i6.Task>>);
+          as _i5.Future<_i6.Result<_i7.Task>>);
 }
 
 /// A class which mocks [CloseTaskUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockCloseTaskUseCase extends _i1.Mock implements _i12.CloseTaskUseCase {
+class MockCloseTaskUseCase extends _i1.Mock implements _i13.CloseTaskUseCase {
   MockCloseTaskUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -203,23 +215,23 @@ class MockCloseTaskUseCase extends _i1.Mock implements _i12.CloseTaskUseCase {
           as _i2.TasksRepository);
 
   @override
-  _i4.Future<_i5.Result<_i6.Task>> call(_i12.CloseTaskParams? params) =>
+  _i5.Future<_i6.Result<_i7.Task>> call(_i13.CloseTaskParams? params) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i4.Future<_i5.Result<_i6.Task>>.value(
-              _i8.dummyValue<_i5.Result<_i6.Task>>(
+            returnValue: _i5.Future<_i6.Result<_i7.Task>>.value(
+              _i9.dummyValue<_i6.Result<_i7.Task>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i4.Future<_i5.Result<_i6.Task>>);
+          as _i5.Future<_i6.Result<_i7.Task>>);
 }
 
 /// A class which mocks [DeleteTaskUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDeleteTaskUseCase extends _i1.Mock implements _i13.DeleteTaskUseCase {
+class MockDeleteTaskUseCase extends _i1.Mock implements _i14.DeleteTaskUseCase {
   MockDeleteTaskUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -236,23 +248,23 @@ class MockDeleteTaskUseCase extends _i1.Mock implements _i13.DeleteTaskUseCase {
           as _i2.TasksRepository);
 
   @override
-  _i4.Future<_i5.Result<void>> call(_i13.DeleteTaskParams? params) =>
+  _i5.Future<_i6.Result<void>> call(_i14.DeleteTaskParams? params) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i4.Future<_i5.Result<void>>.value(
-              _i8.dummyValue<_i5.Result<void>>(
+            returnValue: _i5.Future<_i6.Result<void>>.value(
+              _i9.dummyValue<_i6.Result<void>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i4.Future<_i5.Result<void>>);
+          as _i5.Future<_i6.Result<void>>);
 }
 
 /// A class which mocks [GetSections].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetSections extends _i1.Mock implements _i14.GetSections {
+class MockGetSections extends _i1.Mock implements _i15.GetSections {
   MockGetSections() {
     _i1.throwOnMissingStub(this);
   }
@@ -269,15 +281,117 @@ class MockGetSections extends _i1.Mock implements _i14.GetSections {
           as _i2.TasksRepository);
 
   @override
-  _i4.Future<_i5.Result<List<_i15.Section>>> call(_i7.NoParams? params) =>
+  _i5.Future<_i6.Result<List<_i16.Section>>> call(_i8.NoParams? params) =>
       (super.noSuchMethod(
             Invocation.method(#call, [params]),
-            returnValue: _i4.Future<_i5.Result<List<_i15.Section>>>.value(
-              _i8.dummyValue<_i5.Result<List<_i15.Section>>>(
+            returnValue: _i5.Future<_i6.Result<List<_i16.Section>>>.value(
+              _i9.dummyValue<_i6.Result<List<_i16.Section>>>(
                 this,
                 Invocation.method(#call, [params]),
               ),
             ),
           )
-          as _i4.Future<_i5.Result<List<_i15.Section>>>);
+          as _i5.Future<_i6.Result<List<_i16.Section>>>);
+}
+
+/// A class which mocks [TimerBloc].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockTimerBloc extends _i1.Mock implements _i17.TimerBloc {
+  MockTimerBloc() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.TimerState get state =>
+      (super.noSuchMethod(
+            Invocation.getter(#state),
+            returnValue: _FakeTimerState_1(this, Invocation.getter(#state)),
+          )
+          as _i3.TimerState);
+
+  @override
+  _i5.Stream<_i3.TimerState> get stream =>
+      (super.noSuchMethod(
+            Invocation.getter(#stream),
+            returnValue: _i5.Stream<_i3.TimerState>.empty(),
+          )
+          as _i5.Stream<_i3.TimerState>);
+
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(Invocation.getter(#isClosed), returnValue: false)
+          as bool);
+
+  @override
+  _i5.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  void add(_i18.TimerEvent? event) => super.noSuchMethod(
+    Invocation.method(#add, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onEvent(_i18.TimerEvent? event) => super.noSuchMethod(
+    Invocation.method(#onEvent, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void emit(_i3.TimerState? state) => super.noSuchMethod(
+    Invocation.method(#emit, [state]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void on<E extends _i18.TimerEvent>(
+    _i19.EventHandler<E, _i3.TimerState>? handler, {
+    _i19.EventTransformer<E>? transformer,
+  }) => super.noSuchMethod(
+    Invocation.method(#on, [handler], {#transformer: transformer}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onTransition(
+    _i19.Transition<_i18.TimerEvent, _i3.TimerState>? transition,
+  ) => super.noSuchMethod(
+    Invocation.method(#onTransition, [transition]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onDone(
+    _i18.TimerEvent? event, [
+    Object? error,
+    StackTrace? stackTrace,
+  ]) => super.noSuchMethod(
+    Invocation.method(#onDone, [event, error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onChange(_i19.Change<_i3.TimerState>? change) => super.noSuchMethod(
+    Invocation.method(#onChange, [change]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void addError(Object? error, [StackTrace? stackTrace]) => super.noSuchMethod(
+    Invocation.method(#addError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onError(Object? error, StackTrace? stackTrace) => super.noSuchMethod(
+    Invocation.method(#onError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
 }
