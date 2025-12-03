@@ -27,14 +27,15 @@ jobs:
 
       - name: Create .env file from GitHub Secrets
         run: |
-          cat << 'EOF' > .env
-          TODOIST_API_TOKEN=${{ secrets.TODOIST_API_TOKEN }}
-          USE_REAL_API=${{ secrets.USE_REAL_API }}
-          PROJECT_ID=${{ secrets.PROJECT_ID }}
-          EOF
+          echo "TODOIST_API_TOKEN=${{ secrets.TODOIST_API_TOKEN }}" >> .env
+          echo "USE_REAL_API=${{ secrets.USE_REAL_API }}" >> .env
+          echo "PROJECT_ID=${{ secrets.PROJECT_ID }}" >> .env
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Run build_runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Run Flutter tests
         run: flutter test
