@@ -143,9 +143,15 @@ The Flutter development environment supports hot reload:
 
 ## Testing
 
-### Unit Tests
+### Unit and Widget Tests
 
-Run all unit tests:
+Run all unit and widget tests (excludes integration tests):
+
+```bash
+flutter test test/
+```
+
+Or run all tests in the test directory:
 
 ```bash
 flutter test
@@ -157,9 +163,33 @@ Run tests for a specific file:
 flutter test test/path/to/test_file.dart
 ```
 
+**Note**: Integration tests in `integration_test/` require a device/emulator and should be run separately (see below).
+
 ### Integration Tests
 
-Integration tests are configured to use mock data by default. To run tests against the real Todoist API:
+Integration tests run on real devices/emulators and test complete user flows. They require a connected device or emulator.
+
+**To run integration tests:**
+
+```bash
+# Run all integration tests (requires device/emulator)
+flutter test integration_test/
+
+# Run specific integration test
+flutter test integration_test/screens/task_history_integration_test.dart
+
+# Run on specific device
+flutter test integration_test/ -d <device_id>
+```
+
+**Important**: 
+- Integration tests require a device/emulator to be running
+- Do NOT run `dart test` on integration tests - use `flutter test` instead
+- Integration tests are automatically excluded from regular `flutter test` runs when you specify the `test/` directory
+
+### API Integration Tests
+
+API integration tests are configured to use mock data by default. To run tests against the real Todoist API:
 
 1. Set `USE_REAL_API=true` in your `.env` file
 2. Ensure `TODOIST_API_TOKEN` is set with a valid token
