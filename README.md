@@ -31,6 +31,18 @@ A Flutter mobile application that combines **Kanban task management** with **Tim
 - [macOS Demo](screenshots/macos_recording.mov)
 
 ## Architecture
+## 📦 Latest Builds
+
+**Build from commit:** [`9f80266`](https://github.com/TopiaAmr/time_tracking_kanaban/commit/9f80266711f8b0d912778a8aab33c3e56cdfd160)  
+**Build date:** 2025-12-04 00:29 UTC
+
+### Download Links
+
+- 🤖 [**Android APK (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/actions/runs/19913130541)
+- 🍎 [**iOS App (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/actions/runs/19913130541)
+
+> **Note:** Click the links above to access the GitHub Actions run page, then scroll down to the "Artifacts" section to download the builds.
+
 
 This project follows **Clean Architecture** principles with a feature-first structure:
 
@@ -407,6 +419,18 @@ flutter pub run build_runner watch
 ```
 
 ## Architecture Decisions
+## 📦 Latest Builds
+
+**Build from commit:** [`9f80266`](https://github.com/TopiaAmr/time_tracking_kanaban/commit/9f80266711f8b0d912778a8aab33c3e56cdfd160)  
+**Build date:** 2025-12-04 00:29 UTC
+
+### Download Links
+
+- 🤖 [**Android APK (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/actions/runs/19913130541)
+- 🍎 [**iOS App (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/actions/runs/19913130541)
+
+> **Note:** Click the links above to access the GitHub Actions run page, then scroll down to the "Artifacts" section to download the builds.
+
 
 ### Clean Architecture
 
