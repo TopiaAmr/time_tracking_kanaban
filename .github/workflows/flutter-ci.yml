@@ -79,27 +79,63 @@ jobs:
           name: ios-profile-app
           path: build/ios/archive/Runner-profile.zip
 
+      - name: Generate version tag
+        id: version
+        run: |
+          # Generate version based on date and short commit SHA
+          VERSION="v$(date -u +%Y.%m.%d)-${GITHUB_SHA:0:7}"
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+          echo "Generated version: $VERSION"
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Build ${{ steps.version.outputs.tag }}
+          body: |
+            ## 🚀 Automated Build
+            
+            **Commit:** [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+            **Branch:** ${{ github.ref_name }}
+            **Build Date:** ${{ github.event.head_commit.timestamp }}
+            
+            ### 📱 Downloads
+            - **Android APK (Profile)**: Download `app-profile.apk` below
+            - **iOS App (Profile)**: Download `Runner-profile.zip` below
+            
+            ### 📝 Changes
+            ${{ github.event.head_commit.message }}
+          files: |
+            build/app/outputs/flutter-apk/app-profile.apk
+            build/ios/archive/Runner-profile.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Update README with download links
         run: |
-          # Get the run ID and repo info
-          RUN_ID="${{ github.run_id }}"
+          # Get the repo info
           REPO="${{ github.repository }}"
           COMMIT_SHA="${{ github.sha }}"
           SHORT_SHA="${COMMIT_SHA:0:7}"
+          VERSION="${{ steps.version.outputs.tag }}"
           
           # Create the download links section
           cat > download_links.md << EOF
           ## 📦 Latest Builds
           
           **Build from commit:** [\`${SHORT_SHA}\`](https://github.com/${REPO}/commit/${COMMIT_SHA})  
-          **Build date:** $(date -u +"%Y-%m-%d %H:%M UTC")
+          **Build date:** $(date -u +"%Y-%m-%d %H:%M UTC")  
+          **Version:** [${VERSION}](https://github.com/${REPO}/releases/tag/${VERSION})
           
           ### Download Links
           
-          - 🤖 [**Android APK (Profile)**](https://github.com/${REPO}/actions/runs/${RUN_ID})
-          - 🍎 [**iOS App (Profile)**](https://github.com/${REPO}/actions/runs/${RUN_ID})
+          - 🤖 [**Android APK (Profile)**](https://github.com/${REPO}/releases/download/${VERSION}/app-profile.apk)
+          - 🍎 [**iOS App (Profile)**](https://github.com/${REPO}/releases/download/${VERSION}/Runner-profile.zip)
           
-          > **Note:** Click the links above to access the GitHub Actions run page, then scroll down to the "Artifacts" section to download the builds.
+          > **Note:** Click the links above to download the latest builds directly. You can also view [all releases](https://github.com/${REPO}/releases).
           
           EOF
           
