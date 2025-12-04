@@ -33,37 +33,16 @@ A Flutter mobile application that combines **Kanban task management** with **Tim
 ## Architecture
 ## 📦 Latest Builds
 
-**Build from commit:** [`9f80266`](https://github.com/TopiaAmr/time_tracking_kanaban/commit/9f80266711f8b0d912778a8aab33c3e56cdfd160)  
-**Build date:** 2025-12-04 00:29 UTC
+**Build from commit:** [`9dd84d7`](https://github.com/TopiaAmr/time_tracking_kanaban/commit/9dd84d7debd08c70148dc28e94494a677628d6ea)  
+**Build date:** 2025-12-04 16:00 UTC  
+**Version:** [v2025.12.04-9dd84d7](https://github.com/TopiaAmr/time_tracking_kanaban/releases/tag/v2025.12.04-9dd84d7)
 
 ### Download Links
 
-- 🤖 [**Android APK (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/actions/runs/19913130541)
-- 🍎 [**iOS App (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/actions/runs/19913130541)
+- 🤖 [**Android APK (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/releases/download/v2025.12.04-9dd84d7/app-profile.apk)
+- 🍎 [**iOS App (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/releases/download/v2025.12.04-9dd84d7/Runner-profile.zip)
 
-> **Note:** Click the links above to access the GitHub Actions run page, then scroll down to the "Artifacts" section to download the builds.
-
-
-This project follows **Clean Architecture** principles with a feature-first structure:
-
-- **Data Layer**: Repositories, API Clients (Retrofit), Local Database (Drift), and DTOs
-- **Domain Layer**: Entities, Abstract Repositories, and Use Cases
-- **Presentation Layer**: UI Widgets and State Management (BLoC)
-
-### State Management
-
-The app uses the **BLoC (Business Logic Component)** pattern, implemented with `flutter_bloc`, and applies a deliberate split between **BLoCs** and **Cubits**:
-
-- **BLoCs** are used for **complex, event‑driven flows** with multiple types of inputs and state transitions:
-  - `KanbanBloc`: Handles loading tasks and sections, grouping them into Kanban columns (To Do, In Progress, Done), and processing create/update/move/close/delete task events.
-  - `TimerBloc`: Manages the lifecycle of timers (start, pause, resume, stop, tick, and loading of active timers) and coordinates with the Drift database.
-- **Cubits** are used for **simpler view‑state and configuration** where a single intent method can emit new states directly:
-  - `ThemeCubit`: Manages light/dark theme selection.
-  - `L10nCubit`: Manages the current locale and language switching.
-  - `CommentsCubit`: Manages loading, adding, and updating comments for a given task, exposing straightforward states to the UI.
-  - `TaskHistoryCubit`: Manages the list of completed tasks and their aggregated time history.
-
-This split keeps **complex features** (Kanban, timer) fully traceable and easy to test via events and states, while **simple UI or configuration concerns** remain lightweight and easy to reason about with Cubits.
+> **Note:** Click the links above to download the latest builds directly. You can also view [all releases](https://github.com/TopiaAmr/time_tracking_kanaban/releases).
 
 ## Prerequisites
 
@@ -419,42 +398,6 @@ flutter pub run build_runner watch
 ```
 
 ## Architecture Decisions
-## 📦 Latest Builds
-
-**Build from commit:** [`9f80266`](https://github.com/TopiaAmr/time_tracking_kanaban/commit/9f80266711f8b0d912778a8aab33c3e56cdfd160)  
-**Build date:** 2025-12-04 00:29 UTC
-
-### Download Links
-
-- 🤖 [**Android APK (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/actions/runs/19913130541)
-- 🍎 [**iOS App (Profile)**](https://github.com/TopiaAmr/time_tracking_kanaban/actions/runs/19913130541)
-
-> **Note:** Click the links above to access the GitHub Actions run page, then scroll down to the "Artifacts" section to download the builds.
-
-
-### Clean Architecture
-
-The project follows Clean Architecture to ensure:
-- **Testability**: Business logic is independent of frameworks
-- **Maintainability**: Clear separation of concerns
-- **Scalability**: Easy to add new features
-
-### BLoC Pattern
-
-BLoC is used for state management because it:
-- Separates business logic from UI
-- Makes the app testable
-- Provides reactive state updates
-- Works well with dependency injection
-
-### Dependency Injection
-
-Using `injectable` and `get_it` provides:
-- Centralized dependency management
-- Easy mocking for tests
-- Lazy initialization
-- Singleton management
-
 ## Development Process & TDD
 
 The implementation of this app followed a **Test‑Driven Development (TDD)** mindset:
